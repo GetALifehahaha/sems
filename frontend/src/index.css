@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+
+body {
+    background-color: #E8ECF2;
+
+    font-family: "Urbanist", sans-serif;
+}
+
+@theme {
+    --color-background: #E8ECF2;
+    --color-block: #FEFEFE;
+    --color-primary: #236BD0;
+    --color-secondary: #0F2F76;
+    --color-text: #121212;
+}
