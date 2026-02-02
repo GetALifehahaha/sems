@@ -1,4 +1,6 @@
+// COMPONENTS
 export { default as Header } from './components/Header.jsx'
+export { default as Button } from './components/Button.jsx'
 
 // TYPOGRAPHY
 export { default as PageTitle } from './styles/PageTitle.jsx'
