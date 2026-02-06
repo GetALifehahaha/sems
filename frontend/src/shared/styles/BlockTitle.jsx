@@ -1,8 +1,9 @@
 import React from 'react'
+import { cn } from '../utils/cn'
 
-const BlockTitle = ({children}) => {
+const BlockTitle = ({children, className=""}) => {
   return (
-    <h1 className='text-primary text-[14px] font-bold'>
+    <h1 className={cn('text-secondary text-[20px] font-bold', className)}>
         {children}
     </h1>
   )
