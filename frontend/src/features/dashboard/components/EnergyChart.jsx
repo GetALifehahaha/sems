@@ -1,5 +1,5 @@
 import React from "react";
-import { Bar, BarChart, CartesianGrid, XAxis, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, Rectangle } from "recharts";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import {
     getEnergyChartData,
@@ -26,6 +26,14 @@ const CustomTooltip = ({ active, payload }) => {
 const EnergyChart = ({ frequency = "daily" }) => {
     const chartData = getEnergyChartData(frequency);
 
+    const CustomBar = (props) => {
+        const { consumption } = props;
+        const fill = isHighConsumption(consumption, frequency)
+            ? "#ef4444"
+            : "var(--color-consumption)";
+        return <Rectangle {...props} fill={fill} radius={8} />;
+    };
+
     return (
         <div className="w-full h-full flex flex-col p-4">
             <h3 className="text-center font-bold text-base mb-2">
@@ -44,21 +52,7 @@ const EnergyChart = ({ frequency = "daily" }) => {
                         axisLine={false}
                     />
                     <ChartTooltip cursor={false} content={<CustomTooltip />} />
-                    <Bar dataKey="consumption" radius={8}>
-                        {chartData.map((entry, index) => (
-                            <Cell
-                                key={`cell-${index}`}
-                                fill={
-                                    isHighConsumption(
-                                        entry.consumption,
-                                        frequency,
-                                    )
-                                        ? "#ef4444"
-                                        : "var(--color-consumption)"
-                                }
-                            />
-                        ))}
-                    </Bar>
+                    <Bar dataKey="consumption" shape={<CustomBar />} />
                 </BarChart>
             </ChartContainer>
         </div>
