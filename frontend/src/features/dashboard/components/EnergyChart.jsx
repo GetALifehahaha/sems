@@ -17,8 +17,8 @@ const CustomTooltip = ({ active, payload }) => {
 
     return (
         <div className="rounded-lg border border-border/50 bg-background px-3 py-2 text-sm shadow-xl">
-            <p className="font-medium">{consumption} kWh</p>
-            <p className="text-muted-foreground">₱{payment}</p>
+            <p className="font-medium">Energy Consumption: {consumption} kWh</p>
+            <p className="text-muted-foreground">Payment: ₱ {payment}</p>
         </div>
     );
 };
