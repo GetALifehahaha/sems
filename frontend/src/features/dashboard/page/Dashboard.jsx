@@ -1,25 +1,32 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import {
-	Button,
-	Header,
-	PageTitle,
-	Footer,
-	BodyText,
-	BlockTitle,
-	BlockSubtitle
-} from '../../../shared'
+    Button,
+    Header,
+    PageTitle,
+    Footer,
+    BodyText,
+    BlockTitle,
+    BlockSubtitle,
+} from "../../../shared";
+import { cn } from "../../../shared/utils/cn";
+import { capitalize } from "../../../shared/utils/capitalize.js";
+import Style from "../styles/Style";
+import { MeterDataBlock, EnergyChart, PaymentBlock } from "../";
 import { cn } from '../../../shared/utils/cn'
 import { capitalize } from '../../../shared/utils/capitalize.js'
 import Style from '../styles/Style'
 import { SampleData } from '../data/SampleData.js'
-import { MeterDataBlock, PaymentBlock } from '../'
-import { Zap } from 'lucide-react'
 import { MeterDataBlock } from '../'
 import { Smartphone, Zap } from 'lucide-react'
 
 const Dashboard = () => {
+    const [frequency, setFrequency] = useState("daily");
 
-	const [frequency, setFrequency] = useState('daily')
+    const handleFrequency = (value) => {
+        if (value == frequency) {
+            setFrequency("daily");
+            return;
+        }
 
 	const handleFrequency = (value) => {
 		if (value == frequency) { setFrequency('daily'); return; }
@@ -80,7 +87,7 @@ const Dashboard = () => {
 						</div>
 					</div>
 					<div className="flex-1 bg-white rounded-2xl shadow-2xl">
-
+              <EnergyChart frequency={frequency} />
 					</div>
 				</div>
 				<div className="flex-1 bg-white rounded-2xl flex flex-col p-4 shadow-2xl">
