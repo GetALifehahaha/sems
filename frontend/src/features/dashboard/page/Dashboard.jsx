@@ -1,9 +1,9 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import {
-	Button, 
-	Header, 
-	PageTitle, 
-	Footer, 
+	Button,
+	Header,
+	PageTitle,
+	Footer,
 	BodyText,
 	BlockTitle,
 	BlockSubtitle
@@ -11,29 +11,28 @@ import {
 import { cn } from '../../../shared/utils/cn'
 import { capitalize } from '../../../shared/utils/capitalize.js'
 import Style from '../styles/Style'
-// import SampleData from '../data/SampleData.js'
-import { MeterDataBlock } from '../'
+import { SampleData } from '../data/SampleData.js'
+import { MeterDataBlock, PaymentBlock } from '../'
 import { Zap } from 'lucide-react'
-
 const Dashboard = () => {
 
 	const [frequency, setFrequency] = useState('daily')
 
 	const handleFrequency = (value) => {
-		if (value == frequency) {setFrequency('daily'); return;}
-			
+		if (value == frequency) { setFrequency('daily'); return; }
+
 		setFrequency(value);
 	}
 
 	return (
 		<div className='p-6 flex flex-col'>
 			<Header />
-			
+
 			{/* Frequency Toggle */}
 			<div className='flex gap-2 bg-white p-1 rounded-md w-fit'>
-					<Button text="Daily" className={`font-semibold text-text/50 text-sm rounded-sm py-1 ${frequency === "daily" && 'bg-primary text-white rounded-r-full'}`} onClick={() => handleFrequency('daily')}/>
-					<Button text="Weekly" className={`font-semibold text-text/50 text-sm rounded-sm py-1 ${frequency === "weekly" && 'bg-primary text-white rounded-full'}`} onClick={() => handleFrequency('weekly')}/>
-					<Button text="Monthly" className={`font-semibold text-text/50 text-sm rounded-sm py-1 ${frequency === "monthly" && 'bg-primary text-white rounded-l-full'}`} onClick={() => handleFrequency('monthly')}/>
+				<Button text="Daily" className={`font-semibold text-text/50 text-sm rounded-sm py-1 ${frequency === "daily" && 'bg-primary text-white rounded-r-full'}`} onClick={() => handleFrequency('daily')} />
+				<Button text="Weekly" className={`font-semibold text-text/50 text-sm rounded-sm py-1 ${frequency === "weekly" && 'bg-primary text-white rounded-full'}`} onClick={() => handleFrequency('weekly')} />
+				<Button text="Monthly" className={`font-semibold text-text/50 text-sm rounded-sm py-1 ${frequency === "monthly" && 'bg-primary text-white rounded-l-full'}`} onClick={() => handleFrequency('monthly')} />
 			</div>
 
 			{/* Main Layout */}
@@ -53,10 +52,10 @@ const Dashboard = () => {
 							<div className="">
 								{/* Icon */}
 								<div className='rounded-full aspect-square p-4 border border-background bg-white shadow-xl flex justify-center items-center'>
-									<Zap className="text-primary" />	
+									<Zap className="text-primary" />
 								</div>
 
-								
+
 							</div>
 
 							{/* Middle: The Numbers */}
@@ -72,7 +71,7 @@ const Dashboard = () => {
 				</div>
 				<div className="flex-1 bg-white rounded-2xl flex flex-col p-4 shadow-2xl">
 					<div className='flex-1/2 border-b-2 border-b-text/25'>
-
+						<PaymentBlock kwh={SampleData.kWh} rate={12} />
 					</div>
 					<div className='flex-1/2'>
 
