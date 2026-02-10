@@ -10,3 +10,4 @@ export { default as Style } from "./styles/Style";
 // COMPONENTS
 export { default as MeterDataBlock } from "./components/MeterDataBlock.jsx";
 export { default as EnergyChart } from "./components/EnergyChart.jsx";
+export { default as PaymentBlock } from "./components/PaymentBlock.jsx";

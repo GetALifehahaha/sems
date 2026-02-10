@@ -8,25 +8,15 @@ import {
     BlockTitle,
     BlockSubtitle,
 } from "../../../shared";
-import { cn } from "../../../shared/utils/cn";
-import { capitalize } from "../../../shared/utils/capitalize.js";
 import Style from "../styles/Style";
 import { MeterDataBlock, EnergyChart, PaymentBlock } from "../";
 import { cn } from '../../../shared/utils/cn'
 import { capitalize } from '../../../shared/utils/capitalize.js'
-import Style from '../styles/Style'
 import { SampleData } from '../data/SampleData.js'
-import { MeterDataBlock } from '../'
 import { Smartphone, Zap } from 'lucide-react'
 
 const Dashboard = () => {
     const [frequency, setFrequency] = useState("daily");
-
-    const handleFrequency = (value) => {
-        if (value == frequency) {
-            setFrequency("daily");
-            return;
-        }
 
 	const handleFrequency = (value) => {
 		if (value == frequency) { setFrequency('daily'); return; }
@@ -35,7 +25,7 @@ const Dashboard = () => {
 	}
 
 	return (
-		<div className='p-6 flex flex-col'>
+		<div className='p-6 flex flex-col mb-8'>
 			<Header />
 
 			{/* Frequency Toggle */}
@@ -65,7 +55,9 @@ const Dashboard = () => {
 									<Zap className="text-primary" />
 								</div>
 
-
+								<h5 className='text-sm text-text/50 font-semibold uppercase tracking-wide leading-tight'>
+									Estimated Energy Consumption
+								</h5>
 							</div>
 
 							{/* Middle: The Numbers */}
@@ -95,10 +87,11 @@ const Dashboard = () => {
 						<PaymentBlock kwh={SampleData.kWh} rate={12} />
 					</div>
 					<div className='flex-1/2'>
-
 					</div>
 				</div>
 			</div>
+
+			<div className="h-8"></div>
 		</div>
 	)
 }
