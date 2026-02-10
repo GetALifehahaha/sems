@@ -39,19 +39,19 @@ const Dashboard = () => {
 				<div className="flex flex-col gap-8 flex-1">
 					<div className="basis-1/3 flex flex-row gap-4">
 						<div className='basis-1/3 flex flex-col gap-4'>
-							<MeterDataBlock label="Voltage" data={220} />
-							<MeterDataBlock label="Power" data={10} />
-							<MeterDataBlock label="Current" data={0.045} />
+							<MeterDataBlock label="V" data={220} />
+							<MeterDataBlock label="P" data={10} />
+							<MeterDataBlock label="C" data={0.045} />
 						</div>
-						<div className='flex flex-1 bg-white rounded-md '>
+						<div className='flex flex-1 bg-white rounded-2xl shadow-2xl'>
 							
 						</div>
 					</div>
-					<div className="flex-1 bg-white rounded-md">
+					<div className="flex-1 bg-white rounded-2xl shadow-2xl">
 
 					</div>
 				</div>
-				<div className="flex-1 bg-white rounded-md flex flex-col p-4">
+				<div className="flex-1 bg-white rounded-2xl flex flex-col p-4 shadow-2xl">
 					<div className='flex-1/2 border-b-2 border-b-text/25'>
 
 					</div>
