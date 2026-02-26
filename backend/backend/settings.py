@@ -38,6 +38,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 100,
 }
 
 
@@ -135,6 +137,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# CONFIGURATIONS
+INTERVAL = config('INTERVAL', cast=int)
+LOOKBACK_PERIOD = config('LOOKBACK_PERIOD', cast=int)
+
 # HOSTS
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv)
 
@@ -142,3 +148,8 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv)
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv)
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv)
+
+# SECURITY
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
