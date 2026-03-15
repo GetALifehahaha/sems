@@ -1,26 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-    Button,
-    Header,
-    PageTitle,
-    Footer,
-    BodyText,
-    BlockTitle,
-    BlockSubtitle,
+	Button,
+	Header,
+	PageTitle,
+	Footer,
+	BodyText,
+	BlockTitle,
+	BlockSubtitle,
 } from "../../../shared";
 import Style from "../styles/Style";
 import { MeterDataBlock, EnergyChart, PaymentBlock } from "../";
 import { cn } from '../../../shared/utils/cn'
 import { capitalize } from '../../../shared/utils/capitalize.js'
-import { SampleData } from '../data/SampleData.js'
 import { Smartphone, Zap } from 'lucide-react'
 
 const Dashboard = () => {
-    const [frequency, setFrequency] = useState("daily");
+	const [frequency, setFrequency] = useState("daily");
+
+	// State to hold live data from Django
+	const [liveData, setLiveData] = useState({
+		voltage: 0,
+		power: 0,
+		current: 0,
+		kwh_consumption: 0
+	});
+
+	useEffect(() => {
+		const fetchLatestData = async () => {
+			try {
+				// Uses the environment variable from your .env file
+				const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+				const response = await fetch(`${apiUrl}/electrical/readings-latest/`);
+				if (response.ok) {
+					const data = await response.json();
+					setLiveData({
+						voltage: parseFloat(data.voltage).toFixed(1),
+						power: parseFloat(data.power).toFixed(1),
+						current: parseFloat(data.current).toFixed(3),
+						kwh_consumption: parseFloat(data.kwh_consumption).toFixed(2)
+					});
+				}
+			} catch (error) {
+				console.error("Error fetching live data:", error);
+			}
+		};
+
+		fetchLatestData(); // Fetch immediately on load
+		const intervalId = setInterval(fetchLatestData, 3000); // Poll every 3 seconds
+
+		return () => clearInterval(intervalId); // Cleanup on unmount
+	}, []);
 
 	const handleFrequency = (value) => {
 		if (value == frequency) { setFrequency('daily'); return; }
-
 		setFrequency(value);
 	}
 
@@ -41,9 +73,9 @@ const Dashboard = () => {
 					<div className="basis-1/3 flex flex-row gap-4">
 						{/* Three Musketeers */}
 						<div className='basis-1/3 flex flex-col gap-4'>
-							<MeterDataBlock label="V" labelText="Voltage" data={SampleData.voltage} />
-							<MeterDataBlock label="P" labelText="Power" data={SampleData.power} />
-							<MeterDataBlock label="C" labelText="Current" data={SampleData.current} />
+							<MeterDataBlock label="V" labelText="Voltage" data={liveData.voltage} unit="V" />
+							<MeterDataBlock label="P" labelText="Power" data={liveData.power} unit="W" />
+							<MeterDataBlock label="C" labelText="Current" data={liveData.current} unit="A" />
 						</div>
 
 						{/* The Count */}
@@ -65,7 +97,7 @@ const Dashboard = () => {
 								<div className='w-1 h-full rounded-4xl bg-white mr-auto'>
 								</div>
 								<h1 className='text-6xl text-white font-bold'>
-									{SampleData.kWh}
+									{liveData.kwh_consumption}
 								</h1>
 								<h5 className='text-sm text-white/75 font-semibold mb-1'>
 									kwh
@@ -79,12 +111,12 @@ const Dashboard = () => {
 						</div>
 					</div>
 					<div className="flex-1 bg-white rounded-2xl shadow-2xl">
-              <EnergyChart frequency={frequency} />
+						<EnergyChart frequency={frequency} />
 					</div>
 				</div>
 				<div className="flex-1 bg-white rounded-2xl flex flex-col p-4 shadow-2xl">
 					<div className='flex-1/2 border-b-2 border-b-text/25'>
-						<PaymentBlock kwh={SampleData.kWh} rate={12} />
+						<PaymentBlock kwh={liveData.kwh_consumption} rate={12} />
 					</div>
 					<div className='flex-1/2'>
 					</div>
