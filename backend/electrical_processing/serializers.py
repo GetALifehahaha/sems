@@ -14,7 +14,9 @@ class ElectricalReadingSerializer(serializers.ModelSerializer):
         current = validated_data['current'] 
 
         power = voltage * current
-        kwh_increment = power * INTERVAL / 3_600_000
+        
+        # FIXED MATH: Convert ms to hours (/ 3,600,000) AND Watts to Kilowatts (/ 1000)
+        kwh_increment = (power / 1000) * (INTERVAL / 3600000)
 
         last_reading = ElectricalReading.objects.first()
         total_kwh = (last_reading.kwh_consumption if last_reading else 0) + kwh_increment
