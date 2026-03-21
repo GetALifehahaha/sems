@@ -11,12 +11,14 @@ import {
 const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
 
-    const consumption = payload[0].value;
+    const consumption = Number(payload[0].value) || 0;
     const payment = calculatePayment(consumption);
 
     return (
         <div className="rounded-lg border border-border/50 bg-background px-3 py-2 text-sm shadow-xl">
-            <p className="font-medium">Energy Consumption: {consumption} kWh</p>
+            <p className="font-medium">
+                Energy Consumption: {consumption.toFixed(2)} kWh
+            </p>
             <p className="text-muted-foreground">Payment: ₱ {payment}</p>
         </div>
     );
@@ -24,58 +26,109 @@ const CustomTooltip = ({ active, payload }) => {
 
 const EnergyChart = ({ frequency = "daily" }) => {
     const [chartData, setChartData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
+        let activeController = null;
+
         const fetchChartData = async () => {
+            activeController?.abort();
+            activeController = new AbortController();
+
             try {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                const apiUrl =
+                    import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-                // Fetch the periodic data from your Django backend
-                const response = await fetch(`${apiUrl}/electrical/readings-periodic/?period=${frequency}`);
+                const response = await fetch(
+                    `${apiUrl}/electrical/readings-periodic/?period=${frequency}`,
+                    { signal: activeController.signal },
+                );
 
-                if (response.ok) {
-                    const data = await response.json();
-
-                    // Format the Django data for Recharts
-                    const formattedData = data.map(item => {
-                        const date = new Date(item.period);
-                        let timeLabel = "";
-
-                        if (frequency === "daily") {
-                            timeLabel = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-                        } else if (frequency === "weekly") {
-                            timeLabel = `Week of ${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
-                        } else if (frequency === "monthly") {
-                            timeLabel = date.toLocaleDateString("en-US", { month: "short" });
-                        }
-
-                        return {
-                            time: timeLabel,
-                            consumption: parseFloat(item.kwh_consumption).toFixed(2),
-                        };
-                    });
-
-                    setChartData(formattedData);
+                if (!response.ok) {
+                    throw new Error("Unable to fetch chart data.");
                 }
+
+                const data = await response.json();
+
+                const formattedData = data.map((item) => {
+                    const date = new Date(item.period);
+                    let timeLabel = "";
+
+                    if (frequency === "daily") {
+                        timeLabel = date.toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                        });
+                    } else if (frequency === "weekly") {
+                        timeLabel = `Week of ${date.toLocaleDateString(
+                            "en-US",
+                            {
+                                month: "short",
+                                day: "numeric",
+                            },
+                        )}`;
+                    } else if (frequency === "monthly") {
+                        timeLabel = date.toLocaleDateString("en-US", {
+                            month: "short",
+                        });
+                    }
+
+                    const consumption = Number(item.kwh_consumption) || 0;
+                    return {
+                        time: timeLabel,
+                        consumption,
+                    };
+                });
+
+                setChartData(formattedData);
+                setError("");
             } catch (error) {
+                if (error?.name === "AbortError") {
+                    return;
+                }
                 console.error("Error fetching chart data:", error);
+                setError("Unable to load chart data.");
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchChartData();
-        // Set up a timer to refresh the chart every 10 seconds
-        const interval = setInterval(fetchChartData, 10000);
-        return () => clearInterval(interval);
+        const interval = window.setInterval(fetchChartData, 10000);
+
+        return () => {
+            window.clearInterval(interval);
+            activeController?.abort();
+        };
     }, [frequency]);
 
     const CustomBar = (props) => {
-        const { consumption } = props;
-        // Make sure it handles the parsed float value
-        const fill = isHighConsumption(parseFloat(consumption), frequency)
+        const consumption = Number(props?.payload?.consumption) || 0;
+        const fill = isHighConsumption(consumption, frequency)
             ? "#ef4444"
             : "var(--color-consumption)";
-        return <Rectangle {...props} fill={fill} radius={8} />;
+        return <Rectangle {...props} fill={fill} radius={[8, 8, 0, 0]} />;
     };
+
+    if (error) {
+        return (
+            <div className="w-full h-full flex items-center justify-center p-4">
+                <p className="text-sm text-destructive">{error}</p>
+            </div>
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <div className="w-full h-full flex items-center justify-center p-4">
+                <p className="text-sm text-muted-foreground">
+                    Loading chart data...
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-full flex flex-col p-4">
@@ -91,7 +144,8 @@ const EnergyChart = ({ frequency = "daily" }) => {
                     <XAxis
                         dataKey="time"
                         tickLine={false}
-                        tickMargin={10}
+                        tickMargin={8}
+                        minTickGap={24}
                         axisLine={false}
                     />
                     <ChartTooltip cursor={false} content={<CustomTooltip />} />
