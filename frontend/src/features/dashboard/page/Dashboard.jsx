@@ -17,7 +17,7 @@ import {
     HourlyBreakdown,
     GoalTracker,
     HistoricalComparison,
-} from "../";
+} from "..";
 import { Zap } from "lucide-react";
 
 const FREQUENCY_OPTIONS = ["daily", "weekly", "monthly"];
