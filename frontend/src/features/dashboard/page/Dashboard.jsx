@@ -19,6 +19,7 @@ import {
     HistoricalComparison,
 } from "..";
 import { Zap } from "lucide-react";
+import { fetchJson } from "@/shared";
 
 const FREQUENCY_OPTIONS = ["daily", "weekly", "monthly"];
 const PAYMENT_RATE = 12;
@@ -34,26 +35,24 @@ const Dashboard = () => {
         power: 0,
         current: 0,
         kwhConsumption: 0,
+        todayKwhUsage: 0,
+        monthKwhUsage: 0,
     });
     const [isLiveLoading, setIsLiveLoading] = useState(true);
     const [liveError, setLiveError] = useState("");
+    const [lastUpdated, setLastUpdated] = useState(null);
 
     const fetchLatestData = useCallback(async (signal) => {
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-        const response = await fetch(`${apiUrl}/electrical/readings-latest/`, {
+        const data = await fetchJson("/electrical/readings/latest/", {
             signal,
         });
-
-        if (!response.ok) {
-            throw new Error("Unable to fetch latest readings.");
-        }
-
-        const data = await response.json();
         return {
             voltage: Number(data.voltage) || 0,
             power: Number(data.power) || 0,
             current: Number(data.current) || 0,
             kwhConsumption: Number(data.kwh_consumption) || 0,
+            todayKwhUsage: Number(data.today_kwh_usage) || 0,
+            monthKwhUsage: Number(data.month_kwh_usage) || 0,
         };
     }, []);
 
@@ -68,6 +67,7 @@ const Dashboard = () => {
                 const data = await fetchLatestData(activeController.signal);
                 setLiveData(data);
                 setLiveError("");
+                setLastUpdated(new Date());
             } catch (error) {
                 if (error?.name === "AbortError") {
                     return;
@@ -101,6 +101,7 @@ const Dashboard = () => {
                 power: "--",
                 current: "--",
                 kwhConsumption: "--",
+                todayKwhUsage: "--",
             };
         }
 
@@ -108,7 +109,8 @@ const Dashboard = () => {
             voltage: liveData.voltage.toFixed(1),
             power: liveData.power.toFixed(1),
             current: liveData.current.toFixed(3),
-            kwhConsumption: liveData.kwhConsumption.toFixed(2),
+            kwhConsumption: liveData.todayKwhUsage.toFixed(2),
+            todayKwhUsage: liveData.todayKwhUsage.toFixed(2),
         };
     }, [isLiveLoading, liveData]);
 
@@ -128,7 +130,7 @@ const Dashboard = () => {
                 isOnline={!liveError}
                 isLoading={isLiveLoading}
                 error={liveError}
-                lastUpdated={new Date()}
+                lastUpdated={lastUpdated}
             />
 
             {/* 3. Frequency Selector */}
@@ -193,7 +195,7 @@ const Dashboard = () => {
                                     <Zap className="text-primary" />
                                 </div>
                                 <h3 className="text-xs md:text-sm text-text/70 font-semibold uppercase tracking-wide leading-tight text-right">
-                                    Estimated Energy Consumption
+                                    Estimated Energy Consumption (Today)
                                 </h3>
                             </div>
 
@@ -241,7 +243,7 @@ const Dashboard = () => {
             {/* 7. Payment Block */}
             <div className="mt-6 bg-white rounded-2xl shadow-xl">
                 <PaymentBlock
-                    kwh={liveData.kwhConsumption}
+                    kwh={liveData.todayKwhUsage}
                     rate={PAYMENT_RATE}
                     isLoading={isLiveLoading}
                 />

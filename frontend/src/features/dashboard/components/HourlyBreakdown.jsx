@@ -12,7 +12,7 @@ import {
 import { fetchJson } from "@/shared";
 
 const HourlyBreakdown = ({ isLoading = false }) => {
-    const [backendHourlyData, setBackendHourlyData] = useState(null);
+    const [backendHourlyData, setBackendHourlyData] = useState([]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -47,10 +47,11 @@ const HourlyBreakdown = ({ isLoading = false }) => {
                     });
 
                     setBackendHourlyData(mapped);
+                } else {
+                    setBackendHourlyData([]);
                 }
             } catch {
-                // Keep local generated data while endpoint is not available.
-                setBackendHourlyData(null);
+                setBackendHourlyData([]);
             }
         };
 
@@ -61,49 +62,19 @@ const HourlyBreakdown = ({ isLoading = false }) => {
         return () => controller.abort();
     }, [isLoading]);
 
-    // Generate mock hourly data based on typical consumption patterns
-    const hourlyData = useMemo(() => {
-        const data = [];
-        // Use hour index to create deterministic variance without Math.random()
-        const variances = [
-            0.1, 0.15, 0.2, 0.12, 0.18, 0.08, 0.14, 0.11, 0.19, 0.09, 0.16,
-            0.13, 0.17, 0.1, 0.15, 0.2, 0.12, 0.18, 0.08, 0.14, 0.11, 0.19,
-            0.09, 0.16,
-        ];
+    const resolvedHourlyData = useMemo(() => backendHourlyData, [backendHourlyData]);
 
-        for (let i = 0; i < 24; i++) {
-            const hour = i.toString().padStart(2, "0");
-            // Simulate realistic consumption patterns
-            let baseConsumption = 0.5;
-
-            if (i >= 6 && i < 9)
-                baseConsumption = 2.0; // Morning peak
-            else if (i >= 12 && i < 14)
-                baseConsumption = 1.5; // Lunch time
-            else if (i >= 18 && i < 22)
-                baseConsumption = 2.8; // Evening peak
-            else if (i >= 22 || i < 6) baseConsumption = 0.3; // Night low
-
-            const variance = baseConsumption * variances[i]; // Deterministic variance
-            const consumption = (baseConsumption + variance).toFixed(2);
-
-            data.push({
-                hour: `${hour}:00`,
-                consumption: Number(consumption),
-                displayHour: hour,
-            });
+    const peakHour = useMemo(() => {
+        if (!resolvedHourlyData.length) {
+            return { hour: "00:00", consumption: 0 };
         }
-        return data;
-    }, []);
-
-    const resolvedHourlyData = backendHourlyData || hourlyData;
-
-    const peakHour = resolvedHourlyData.reduce((max, curr) =>
-        curr.consumption > max.consumption ? curr : max,
-    );
+        return resolvedHourlyData.reduce((max, curr) =>
+            curr.consumption > max.consumption ? curr : max,
+        );
+    }, [resolvedHourlyData]);
 
     return (
-        <Card className="p-4 md:p-5 min-h-[300px]">
+        <Card className="p-4 md:p-5 min-h-75">
             <div className="mb-4">
                 <h3 className="text-base md:text-lg font-bold mb-1">
                     Hourly Consumption (Last 24H)
@@ -117,6 +88,12 @@ const HourlyBreakdown = ({ isLoading = false }) => {
                 <div className="flex items-center justify-center h-56">
                     <p className="text-sm text-muted-foreground">
                         Loading hourly data...
+                    </p>
+                </div>
+            ) : resolvedHourlyData.length === 0 ? (
+                <div className="flex items-center justify-center h-56">
+                    <p className="text-sm text-muted-foreground">
+                        No hourly data available yet.
                     </p>
                 </div>
             ) : (

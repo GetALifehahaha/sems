@@ -1,11 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Zap, BarChart3, DollarSign, Target } from "lucide-react";
+import { Zap, BarChart3, DollarSign, Target, PhilippinePeso } from "lucide-react";
 import { fetchJson } from "@/shared";
 
 const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
-    const StatIcons = { Zap, BarChart3, DollarSign, Target };
-    const [backendStats, setBackendStats] = useState(null);
+    const StatIcons = { Zap, BarChart3, PhilippinePeso, Target };
+    const [backendStats, setBackendStats] = useState({
+        peak_usage_today: 0,
+        average_usage: 0,
+        projected_cost: 0,
+        budget_usage_percent: 0,
+    });
 
     useEffect(() => {
         const controller = new AbortController();
@@ -27,8 +32,12 @@ const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
 
                 setBackendStats(data);
             } catch {
-                // Fallback to local computation when endpoint is not ready.
-                setBackendStats(null);
+                setBackendStats({
+                    peak_usage_today: 0,
+                    average_usage: 0,
+                    projected_cost: 0,
+                    budget_usage_percent: 0,
+                });
             }
         };
 
@@ -46,25 +55,10 @@ const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
     ]);
 
     const stats = useMemo(() => {
-        const kwhValue = Number(liveData.kwhConsumption) || 0;
-        const projectedCost = (kwhValue * PAYMENT_RATE).toFixed(2);
-
-        const peakUsageToday =
-            backendStats?.peak_usage_today !== undefined
-                ? Number(backendStats.peak_usage_today)
-                : kwhValue;
-        const averageUsage =
-            backendStats?.average_usage !== undefined
-                ? Number(backendStats.average_usage)
-                : kwhValue * 0.85;
-        const budgetUsagePercent =
-            backendStats?.budget_usage_percent !== undefined
-                ? Number(backendStats.budget_usage_percent)
-                : (kwhValue / 150) * 100;
-        const projectedCostValue =
-            backendStats?.projected_cost !== undefined
-                ? Number(backendStats.projected_cost).toFixed(2)
-                : projectedCost;
+        const peakUsageToday = Number(backendStats?.peak_usage_today) || 0;
+        const averageUsage = Number(backendStats?.average_usage) || 0;
+        const budgetUsagePercent = Number(backendStats?.budget_usage_percent) || 0;
+        const projectedCostValue = (Number(backendStats?.projected_cost) || 0).toFixed(2);
 
         return [
             {
@@ -83,7 +77,7 @@ const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
                 label: "Projected Cost",
                 value: isLoading ? "--" : `₱${projectedCostValue}`,
                 unit: "this month",
-                icon: "DollarSign",
+                icon: "PhilippinePeso",
             },
             {
                 label: "Budget Usage",
@@ -92,7 +86,7 @@ const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
                 icon: "Target",
             },
         ];
-    }, [liveData.kwhConsumption, isLoading, PAYMENT_RATE, backendStats]);
+    }, [isLoading, backendStats]);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

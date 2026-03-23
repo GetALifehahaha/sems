@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, Bell, CheckCircle, TrendingUp, Zap } from "lucide-react";
+import { AlertCircle, Bell, CheckCircle } from "lucide-react";
 import { fetchJson } from "@/shared";
 
 const mapBackendNotification = (notif, idx) => {
@@ -21,91 +21,8 @@ const mapBackendNotification = (notif, idx) => {
     };
 };
 
-const buildLocalNotifications = ({ liveData, paymentRate }) => {
-    const alerts = [];
-    const kwhValue = Number(liveData.kwhConsumption) || 0;
-    const power = Number(liveData.power) || 0;
-    const current = Number(liveData.current) || 0;
-
-    const budgetUsagePercent = (kwhValue / 150) * 100;
-    if (budgetUsagePercent >= 85 && budgetUsagePercent < 100) {
-        alerts.push({
-            id: "budget_warning",
-            type: "warning",
-            icon: AlertCircle,
-            title: "Budget Alert",
-            message: `You're at ${budgetUsagePercent.toFixed(0)}% of monthly limit`,
-            severity: "high",
-            timestamp: new Date(),
-        });
-    }
-
-    if (budgetUsagePercent >= 100) {
-        alerts.push({
-            id: "budget_exceeded",
-            type: "error",
-            icon: AlertCircle,
-            title: "Budget Exceeded",
-            message: `You've used ${budgetUsagePercent.toFixed(0)}% of your monthly limit`,
-            severity: "critical",
-            timestamp: new Date(),
-        });
-    }
-
-    if (power > 2500) {
-        alerts.push({
-            id: "high_consumption",
-            type: "warning",
-            icon: Zap,
-            title: "High Consumption",
-            message: `High power usage: ${power}W detected`,
-            severity: "high",
-            timestamp: new Date(),
-        });
-    }
-
-    if (current > 15) {
-        alerts.push({
-            id: "high_current",
-            type: "warning",
-            icon: AlertCircle,
-            title: "High Current",
-            message: `Current load: ${current.toFixed(2)}A (monitor appliances)`,
-            severity: "medium",
-            timestamp: new Date(),
-        });
-    }
-
-    const projectedCost = (kwhValue * paymentRate).toFixed(2);
-    if (projectedCost > 1800) {
-        alerts.push({
-            id: "cost_high",
-            type: "warning",
-            icon: TrendingUp,
-            title: "Cost Projection",
-            message: `Projected cost: ₱${projectedCost} (higher than usual)`,
-            severity: "high",
-            timestamp: new Date(),
-        });
-    }
-
-    if (alerts.length === 0) {
-        alerts.push({
-            id: "system_ok",
-            type: "success",
-            icon: CheckCircle,
-            title: "System Status",
-            message: "All systems operating normally",
-            severity: "low",
-            timestamp: new Date(),
-        });
-    }
-
-    return alerts;
-};
-
 export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
-    const [backendNotifications, setBackendNotifications] = useState(null);
+    const [backendNotifications, setBackendNotifications] = useState([]);
 
     const kwh = Number(liveData?.kwhConsumption) || 0;
     const power = Number(liveData?.power) || 0;
@@ -126,15 +43,17 @@ export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
                     },
                 });
 
+                console.log("Fetched notifications:", data);
+
                 if (Array.isArray(data)) {
                     setBackendNotifications(data);
                 } else if (Array.isArray(data?.notifications)) {
                     setBackendNotifications(data.notifications);
                 } else {
-                    setBackendNotifications(null);
+                    setBackendNotifications([]);
                 }
             } catch {
-                setBackendNotifications(null);
+                setBackendNotifications([]);
             }
         };
 
@@ -148,11 +67,8 @@ export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
     }, [kwh, power, current, paymentRate]);
 
     return useMemo(() => {
-        const source =
-            backendNotifications?.length > 0
-                ? backendNotifications.map(mapBackendNotification)
-                : buildLocalNotifications({ liveData, paymentRate });
+        const source = backendNotifications.map(mapBackendNotification);
 
         return source.filter((alert) => !dismissedIds.has(alert.id));
-    }, [backendNotifications, dismissedIds, liveData, paymentRate]);
+    }, [backendNotifications, dismissedIds]);
 };

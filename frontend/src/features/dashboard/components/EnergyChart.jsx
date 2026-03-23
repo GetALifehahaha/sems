@@ -7,6 +7,7 @@ import {
     isHighConsumption,
     calculatePayment,
 } from "../data/EnergyChart";
+import { fetchJson } from "@/shared";
 
 const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
@@ -37,19 +38,10 @@ const EnergyChart = ({ frequency = "daily" }) => {
             activeController = new AbortController();
 
             try {
-                const apiUrl =
-                    import.meta.env.VITE_API_URL || "http://localhost:8000";
-
-                const response = await fetch(
-                    `${apiUrl}/electrical/readings-periodic/?period=${frequency}`,
-                    { signal: activeController.signal },
-                );
-
-                if (!response.ok) {
-                    throw new Error("Unable to fetch chart data.");
-                }
-
-                const data = await response.json();
+                const data = await fetchJson("/electrical/readings/periodic/", {
+                    signal: activeController.signal,
+                    query: { period: frequency },
+                });
 
                 const formattedData = data.map((item) => {
                     const date = new Date(item.period);
@@ -96,7 +88,7 @@ const EnergyChart = ({ frequency = "daily" }) => {
         };
 
         fetchChartData();
-        const interval = window.setInterval(fetchChartData, 10000);
+        const interval = window.setInterval(fetchChartData, 5000);
 
         return () => {
             window.clearInterval(interval);

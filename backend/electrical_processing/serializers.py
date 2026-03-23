@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import ElectricalReading
 
 from backend.settings import INTERVAL
@@ -14,11 +15,23 @@ class ElectricalReadingSerializer(serializers.ModelSerializer):
         current = validated_data['current'] 
 
         power = voltage * current
-        
-        # FIXED MATH: Convert ms to hours (/ 3,600,000) AND Watts to Kilowatts (/ 1000)
-        kwh_increment = (power / 1000) * (INTERVAL / 3600000)
 
         last_reading = ElectricalReading.objects.first()
+
+        # Use real elapsed time between readings to avoid overcounting when input cadence changes.
+        elapsed_ms = INTERVAL
+        if last_reading is not None:
+            elapsed_ms = max(
+                1,
+                int((timezone.now() - last_reading.timestamp).total_seconds() * 1000),
+            )
+
+            # Prevent unrealistic jumps if telemetry pauses for a long time.
+            elapsed_ms = min(elapsed_ms, INTERVAL * 5)
+
+        # Convert Watts to kW and milliseconds to hours.
+        kwh_increment = (power / 1000) * (elapsed_ms / 3600000)
+
         total_kwh = (last_reading.kwh_consumption if last_reading else 0) + kwh_increment
 
         return ElectricalReading.objects.create(
