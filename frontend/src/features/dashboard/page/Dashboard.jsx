@@ -24,6 +24,12 @@ import { fetchJson } from "@/shared";
 const FREQUENCY_OPTIONS = ["daily", "weekly", "monthly"];
 const PAYMENT_RATE = 12;
 
+// Helper to grab the right WebSocket URL
+const getWsUrl = () => {
+    const baseUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000";
+    return `${baseUrl}/ws/electrical/`;
+};
+
 const Dashboard = () => {
     const [frequency, setFrequency] = useState("daily");
     const [isPending, startTransition] = useTransition();
@@ -42,51 +48,80 @@ const Dashboard = () => {
     const [liveError, setLiveError] = useState("");
     const [lastUpdated, setLastUpdated] = useState(null);
 
-    const fetchLatestData = useCallback(async (signal) => {
-        const data = await fetchJson("/electrical/readings/latest/", {
-            signal,
-        });
-        return {
-            voltage: Number(data.voltage) || 0,
-            power: Number(data.power) || 0,
-            current: Number(data.current) || 0,
-            kwhConsumption: Number(data.kwh_consumption) || 0,
-            todayKwhUsage: Number(data.today_kwh_usage) || 0,
-            monthKwhUsage: Number(data.month_kwh_usage) || 0,
+    // 1. Fetch initial data ONCE so the screen isn't empty while connecting
+    useEffect(() => {
+        let activeController = new AbortController();
+        const fetchInitial = async () => {
+            try {
+                const data = await fetchJson("/electrical/readings/latest/", {
+                    signal: activeController.signal,
+                });
+                setLiveData({
+                    voltage: Number(data.voltage) || 0,
+                    power: Number(data.power) || 0,
+                    current: Number(data.current) || 0,
+                    kwhConsumption: Number(data.kwh_consumption) || 0,
+                    todayKwhUsage: Number(data.today_kwh_usage) || 0,
+                    monthKwhUsage: Number(data.month_kwh_usage) || 0,
+                });
+                setLastUpdated(new Date());
+                setIsLiveLoading(false);
+            } catch (err) {
+                if (err?.name !== "AbortError") {
+                    console.error("Failed to fetch initial data", err);
+                }
+            }
         };
+        fetchInitial();
+        return () => activeController.abort();
     }, []);
 
+    // 2. The LIVE WebSocket Phone Line!
     useEffect(() => {
-        let activeController = null;
+        const wsUrl = getWsUrl();
+        const socket = new WebSocket(wsUrl);
 
-        const runFetch = async () => {
-            activeController?.abort();
-            activeController = new AbortController();
+        // When the phone line opens
+        socket.onopen = () => {
+            console.log("🟢 Connected to live data stream!");
+            setLiveError("");
+        };
 
+        // When the ESP32 shouts data down the line
+        socket.onmessage = (event) => {
             try {
-                const data = await fetchLatestData(activeController.signal);
-                setLiveData(data);
-                setLiveError("");
+                const data = JSON.parse(event.data);
+
+                // Instantly update the React state with the new numbers
+                setLiveData((prev) => ({
+                    ...prev,
+                    voltage: Number(data.voltage) || prev.voltage,
+                    power: Number(data.power) || prev.power,
+                    current: Number(data.current) || prev.current,
+                    kwhConsumption: Number(data.kwh_consumption) || prev.kwhConsumption,
+                }));
                 setLastUpdated(new Date());
-            } catch (error) {
-                if (error?.name === "AbortError") {
-                    return;
-                }
-                console.error("Error fetching live data:", error);
-                setLiveError("Unable to refresh meter readings right now.");
-            } finally {
                 setIsLiveLoading(false);
+            } catch (error) {
+                console.error("Error parsing live data:", error);
             }
         };
 
-        runFetch();
-        const intervalId = window.setInterval(runFetch, 5000);
-
-        return () => {
-            window.clearInterval(intervalId);
-            activeController?.abort();
+        socket.onerror = (error) => {
+            console.error("WebSocket Error:", error);
+            setLiveError("Live stream connection lost.");
         };
-    }, [fetchLatestData]);
+
+        socket.onclose = () => {
+            console.log("🔴 WebSocket Disconnected");
+            setLiveError("Live stream paused.");
+        };
+
+        // Clean up the connection if the user closes the page
+        return () => {
+            socket.close();
+        };
+    }, []);
 
     const handleFrequency = useCallback((value) => {
         startTransition(() => {
@@ -118,14 +153,12 @@ const Dashboard = () => {
         <div className="p-4 md:p-6 flex flex-col mb-8">
             <Header liveData={liveData} PAYMENT_RATE={PAYMENT_RATE} />
 
-            {/* 1. Quick Stats Cards */}
             <QuickStatsCards
                 liveData={liveData}
                 isLoading={isLiveLoading}
                 PAYMENT_RATE={PAYMENT_RATE}
             />
 
-            {/* 2. Status Indicator */}
             <StatusIndicator
                 isOnline={!liveError}
                 isLoading={isLiveLoading}
@@ -133,7 +166,6 @@ const Dashboard = () => {
                 lastUpdated={lastUpdated}
             />
 
-            {/* 3. Frequency Selector */}
             <div className="flex flex-wrap items-center gap-3 mb-6">
                 <span id={frequencyGroupId} className="sr-only">
                     Select energy chart frequency
@@ -163,10 +195,9 @@ const Dashboard = () => {
                     <p className="text-sm text-text/70">Refreshing chart...</p>
                 )}
             </div>
-            {/* 4. Main Charts and Goal Tracker */}
+
             <div className="flex flex-col xl:flex-row gap-6 mb-6">
                 <div className="flex flex-col gap-6 flex-1">
-                    {/* Meter Data + Energy Consumption */}
                     <div className="grid gap-4 lg:grid-cols-[17rem_1fr]">
                         <div className="flex flex-col gap-4">
                             <MeterDataBlock
@@ -216,13 +247,11 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Daily Energy Chart */}
                     <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                         <EnergyChart frequency={deferredFrequency} />
                     </div>
                 </div>
 
-                {/* Goal Tracker */}
                 <div className="w-full xl:w-80">
                     <GoalTracker
                         liveData={liveData}
@@ -231,16 +260,14 @@ const Dashboard = () => {
                     />
                 </div>
             </div>
-            {/* 5. Historical Comparison */}
+
             <HistoricalComparison
                 liveData={liveData}
                 isLoading={isLiveLoading}
             />
 
-            {/* 6. Hourly Breakdown */}
             <HourlyBreakdown isLoading={isLiveLoading} />
 
-            {/* 7. Payment Block */}
             <div className="mt-6 bg-white rounded-2xl shadow-xl">
                 <PaymentBlock
                     kwh={liveData.todayKwhUsage}
