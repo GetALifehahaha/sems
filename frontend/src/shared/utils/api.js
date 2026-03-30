@@ -16,7 +16,14 @@ export const buildUrl = (path, query = {}) => {
 };
 
 export const fetchJson = async (path, { signal, query } = {}) => {
-    const response = await fetch(buildUrl(path, query), { signal });
+    const response = await fetch(buildUrl(path, query), { 
+        signal: signal,
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "69420"
+        }
+    });
 
     if (!response.ok) {
         throw new Error(`Request failed: ${response.status}`);
