@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Bar, BarChart, CartesianGrid, XAxis, Rectangle } from "recharts";
+import { Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis, Rectangle } from "recharts";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import {
     getSubtitle,
@@ -29,6 +29,9 @@ const EnergyChart = ({ frequency = "daily" }) => {
     const [chartData, setChartData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+
+    // This is the state that controls our side-by-side toggle button
+    const [chartType, setChartType] = useState("bar");
 
     useEffect(() => {
         let activeController = null;
@@ -124,25 +127,77 @@ const EnergyChart = ({ frequency = "daily" }) => {
 
     return (
         <div className="w-full h-full flex flex-col p-4">
-            <h3 className="text-center font-bold text-base mb-2">
-                Energy Consumption
-            </h3>
-            <p className="text-center text-sm text-muted-foreground mb-4">
-                {getSubtitle(frequency)}
-            </p>
-            <ChartContainer config={chartConfig} className="h-full w-full">
-                <BarChart accessibilityLayer data={chartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                        dataKey="time"
-                        tickLine={false}
-                        tickMargin={8}
-                        minTickGap={24}
-                        axisLine={false}
-                    />
-                    <ChartTooltip cursor={false} content={<CustomTooltip />} />
-                    <Bar dataKey="consumption" shape={<CustomBar />} />
-                </BarChart>
+
+            {/* The Header and our side-by-side toggle switch */}
+            <div className="flex justify-between items-center mb-4 px-2">
+                <div>
+                    <h3 className="font-bold text-base mb-1">
+                        Energy Consumption
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                        {getSubtitle(frequency)}
+                    </p>
+                </div>
+
+                {/* Side-by-side buttons wrapped in a gray pill shape */}
+                <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/50">
+                    <button
+                        onClick={() => setChartType("bar")}
+                        className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${chartType === "bar"
+                            ? "bg-white text-primary shadow-sm"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                            }`}
+                    >
+                        Bar
+                    </button>
+                    <button
+                        onClick={() => setChartType("area")}
+                        className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${chartType === "area"
+                            ? "bg-white text-primary shadow-sm"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                            }`}
+                    >
+                        Area
+                    </button>
+                </div>
+            </div>
+
+            <ChartContainer config={chartConfig} className="h-full w-full min-h-62.5">
+                {/* This asks: Is chartType equal to "bar"? If yes, show BarChart. If no, show AreaChart. */}
+                {chartType === "bar" ? (
+                    <BarChart accessibilityLayer data={chartData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                            dataKey="time"
+                            tickLine={false}
+                            tickMargin={8}
+                            minTickGap={24}
+                            axisLine={false}
+                        />
+                        <ChartTooltip cursor={false} content={<CustomTooltip />} />
+                        <Bar dataKey="consumption" shape={<CustomBar />} />
+                    </BarChart>
+                ) : (
+                    <AreaChart accessibilityLayer data={chartData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                            dataKey="time"
+                            tickLine={false}
+                            tickMargin={8}
+                            minTickGap={24}
+                            axisLine={false}
+                        />
+                        <ChartTooltip cursor={false} content={<CustomTooltip />} />
+                        <Area
+                            type="monotone"
+                            dataKey="consumption"
+                            stroke="var(--color-consumption)"
+                            fill="var(--color-consumption)"
+                            fillOpacity={0.2}
+                            strokeWidth={3}
+                        />
+                    </AreaChart>
+                )}
             </ChartContainer>
         </div>
     );
