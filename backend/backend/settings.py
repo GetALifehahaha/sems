@@ -95,10 +95,9 @@ ASGI_APPLICATION = 'backend.asgi.application'
 # Configure the Channel Layer (In-memory for development)
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
 }
-
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

@@ -78,48 +78,65 @@ const Dashboard = () => {
 
     // 2. The LIVE WebSocket Phone Line!
     useEffect(() => {
-        const wsUrl = getWsUrl();
-        const socket = new WebSocket(wsUrl);
+        let socket;
+        let retryTimeout;
+        let isMounted = true;
 
-        // When the phone line opens
-        socket.onopen = () => {
-            console.log("🟢 Connected to live data stream!");
-            setLiveError("");
+        const connect = () => {
+            if (!isMounted) return;
+
+            const wsUrl = getWsUrl();
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = () => {
+                console.log("🟢 Connected to live data stream!");
+                setLiveError("");
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    setLiveData((prev) => ({
+                        ...prev,
+                        voltage: Number(data.voltage) || prev.voltage,
+                        power: Number(data.power) || prev.power,
+                        current: Number(data.current) || prev.current,
+                        kwhConsumption: Number(data.kwh_consumption) || prev.kwhConsumption,
+                    }));
+                    setLastUpdated(new Date());
+                    setIsLiveLoading(false);
+                } catch (error) {
+                    console.error("Error parsing live data:", error);
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error("WebSocket Error:", error);
+                setLiveError("Live stream connection lost.");
+            };
+
+            socket.onclose = () => {
+                console.log("🔴 WebSocket Disconnected. Retrying in 5s...");
+                setLiveError("Live stream paused. Reconnecting...");
+                if (isMounted) {
+                    retryTimeout = setTimeout(connect, 5000);
+                }
+            };
         };
 
-        // When the ESP32 shouts data down the line
-        socket.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
+        connect();
 
-                // Instantly update the React state with the new numbers
-                setLiveData((prev) => ({
-                    ...prev,
-                    voltage: Number(data.voltage) || prev.voltage,
-                    power: Number(data.power) || prev.power,
-                    current: Number(data.current) || prev.current,
-                    kwhConsumption: Number(data.kwh_consumption) || prev.kwhConsumption,
-                }));
-                setLastUpdated(new Date());
-                setIsLiveLoading(false);
-            } catch (error) {
-                console.error("Error parsing live data:", error);
-            }
-        };
-
-        socket.onerror = (error) => {
-            console.error("WebSocket Error:", error);
-            setLiveError("Live stream connection lost.");
-        };
-
-        socket.onclose = () => {
-            console.log("🔴 WebSocket Disconnected");
-            setLiveError("Live stream paused.");
-        };
-
-        // Clean up the connection if the user closes the page
         return () => {
-            socket.close();
+            isMounted = false;
+            clearTimeout(retryTimeout);
+            if (socket) {
+                // Detach handlers before close to prevent onclose from firing
+                socket.onopen = null;
+                socket.onmessage = null;
+                socket.onerror = null;
+                socket.onclose = null;
+                socket.close();
+            }
         };
     }, []);
 
