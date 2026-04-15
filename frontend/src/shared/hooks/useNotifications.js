@@ -21,13 +21,13 @@ const mapBackendNotification = (notif, idx) => {
     };
 };
 
-const buildLocalNotifications = ({ liveData, paymentRate }) => {
+const buildLocalNotifications = ({ liveData, paymentRate, targetKwh = 150 }) => {
     const alerts = [];
     const kwhValue = Number(liveData.kwhConsumption) || 0;
     const power = Number(liveData.power) || 0;
     const current = Number(liveData.current) || 0;
 
-    const budgetUsagePercent = (kwhValue / 150) * 100;
+    const budgetUsagePercent = (kwhValue / targetKwh) * 100;
     if (budgetUsagePercent >= 85 && budgetUsagePercent < 100) {
         alerts.push({
             id: "budget_warning",
@@ -104,7 +104,7 @@ const buildLocalNotifications = ({ liveData, paymentRate }) => {
     return alerts;
 };
 
-export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
+export const useNotifications = ({ liveData, paymentRate, targetKwh = 150, dismissedIds }) => {
     const [backendNotifications, setBackendNotifications] = useState(null);
 
     const kwh = Number(liveData?.kwhConsumption) || 0;
@@ -151,8 +151,8 @@ export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
         const source =
             backendNotifications?.length > 0
                 ? backendNotifications.map(mapBackendNotification)
-                : buildLocalNotifications({ liveData, paymentRate });
+                : buildLocalNotifications({ liveData, paymentRate, targetKwh });
 
         return source.filter((alert) => !dismissedIds.has(alert.id));
-    }, [backendNotifications, dismissedIds, liveData, paymentRate]);
+    }, [backendNotifications, dismissedIds, liveData, paymentRate, targetKwh]);
 };

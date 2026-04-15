@@ -13,4 +13,11 @@ export { default as BlockSubtitle } from "./styles/BlockSubtitle.jsx";
 // UTILS
 export { cn } from "./utils/cn.js";
 export { capitalize } from "./utils/capitalize.js";
-export { getApiBaseUrl, buildUrl, fetchJson } from "./utils/api.js";
+export {
+    getApiBaseUrl,
+    buildUrl,
+    fetchJson,
+    patchJson,
+    getPreferences,
+    updatePreferences,
+} from "./utils/api.js";

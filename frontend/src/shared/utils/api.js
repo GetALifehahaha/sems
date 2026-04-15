@@ -24,3 +24,26 @@ export const fetchJson = async (path, { signal, query } = {}) => {
 
     return response.json();
 };
+
+export const patchJson = async (path, body, { signal } = {}) => {
+    const response = await fetch(buildUrl(path), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal,
+    });
+
+    if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+    }
+
+    return response.json();
+};
+
+const PREFERENCES_PATH = "/electrical/preferences/";
+
+export const getPreferences = (signal) =>
+    fetchJson(PREFERENCES_PATH, { signal });
+
+export const updatePreferences = (body, signal) =>
+    patchJson(PREFERENCES_PATH, body, { signal });

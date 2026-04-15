@@ -17,11 +17,12 @@ import {
     HourlyBreakdown,
     GoalTracker,
     HistoricalComparison,
+    PreferencesModal,
 } from "../";
+import { usePreferences } from "../hooks/usePreferences";
 import { Zap } from "lucide-react";
 
 const FREQUENCY_OPTIONS = ["daily", "weekly", "monthly"];
-const PAYMENT_RATE = 12;
 
 const Dashboard = () => {
     const [frequency, setFrequency] = useState("daily");
@@ -88,6 +89,9 @@ const Dashboard = () => {
         };
     }, [fetchLatestData]);
 
+    const { prefs, loading: prefsLoading, saving, error: saveError, savePreferences } = usePreferences();
+    const [showPrefsModal, setShowPrefsModal] = useState(false);
+
     const handleFrequency = useCallback((value) => {
         startTransition(() => {
             setFrequency(value);
@@ -114,13 +118,23 @@ const Dashboard = () => {
 
     return (
         <div className="p-4 md:p-6 flex flex-col mb-8">
-            <Header liveData={liveData} PAYMENT_RATE={PAYMENT_RATE} />
+            <Header liveData={liveData} PAYMENT_RATE={prefs.costRate} />
+
+            {showPrefsModal && (
+                <PreferencesModal
+                    prefs={prefs}
+                    saving={saving}
+                    saveError={saveError}
+                    onSave={savePreferences}
+                    onClose={() => setShowPrefsModal(false)}
+                />
+            )}
 
             {/* 1. Quick Stats Cards */}
             <QuickStatsCards
                 liveData={liveData}
                 isLoading={isLiveLoading}
-                PAYMENT_RATE={PAYMENT_RATE}
+                PAYMENT_RATE={prefs.costRate}
             />
 
             {/* 2. Status Indicator */}
@@ -225,7 +239,11 @@ const Dashboard = () => {
                     <GoalTracker
                         liveData={liveData}
                         isLoading={isLiveLoading}
-                        PAYMENT_RATE={PAYMENT_RATE}
+                        targetKwh={prefs.targetKwh}
+                        costRate={prefs.costRate}
+                        cycleStartDay={prefs.cycleStartDay}
+                        prefsLoading={prefsLoading}
+                        onEditPreferences={() => setShowPrefsModal(true)}
                     />
                 </div>
             </div>
@@ -242,7 +260,7 @@ const Dashboard = () => {
             <div className="mt-6 bg-white rounded-2xl shadow-xl">
                 <PaymentBlock
                     kwh={liveData.kwhConsumption}
-                    rate={PAYMENT_RATE}
+                    rate={prefs.costRate}
                     isLoading={isLiveLoading}
                 />
             </div>

@@ -1,16 +1,18 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, XCircle, Pencil } from "lucide-react";
 import { fetchJson } from "@/shared";
 
 const GoalTracker = ({
     liveData = {},
     isLoading = false,
-    PAYMENT_RATE = 12,
+    targetKwh = 150,
+    costRate = 12,
+    cycleStartDay = 1,
+    prefsLoading = false,
+    onEditPreferences,
 }) => {
-    const MONTHLY_TARGET_KWH = 150;
-    const DAYS_IN_MONTH = 30;
     const [backendGoal, setBackendGoal] = useState(null);
 
     useEffect(() => {
@@ -24,43 +26,50 @@ const GoalTracker = ({
                         signal: controller.signal,
                         query: {
                             kwh: liveData.kwhConsumption,
-                            payment_rate: PAYMENT_RATE,
+                            payment_rate: costRate,
                         },
                     },
                 );
                 setBackendGoal(data);
             } catch {
-                // Fallback to local calculation when endpoint is unavailable.
                 setBackendGoal(null);
             }
         };
 
-        if (!isLoading) {
-            loadGoal();
-        }
+        if (!isLoading) loadGoal();
 
         return () => controller.abort();
-    }, [liveData.kwhConsumption, PAYMENT_RATE, isLoading]);
+    }, [liveData.kwhConsumption, costRate, isLoading]);
 
     const goalData = useMemo(() => {
         const kwhUsed =
             backendGoal?.kwh_used !== undefined
                 ? Number(backendGoal.kwh_used)
                 : Number(liveData.kwhConsumption) || 0;
-        const percentageUsed = (kwhUsed / MONTHLY_TARGET_KWH) * 100;
-        const remaining = Math.max(0, MONTHLY_TARGET_KWH - kwhUsed);
+        const percentageUsed = (kwhUsed / targetKwh) * 100;
+        const remaining = Math.max(0, targetKwh - kwhUsed);
         const costUsed =
             backendGoal?.cost_used !== undefined
                 ? Number(backendGoal.cost_used).toFixed(2)
-                : (kwhUsed * PAYMENT_RATE).toFixed(2);
-        const costRemaining = (remaining * PAYMENT_RATE).toFixed(2);
+                : (kwhUsed * costRate).toFixed(2);
 
-        // Estimate days remaining in month (assuming 30-day cycle)
         const today = new Date().getDate();
-        const daysRemaining = Math.max(1, DAYS_IN_MONTH - today);
+        const daysInMonth = new Date(
+            new Date().getFullYear(),
+            new Date().getMonth() + 1,
+            0,
+        ).getDate();
+        const daysSinceCycleStart =
+            today >= cycleStartDay
+                ? today - cycleStartDay
+                : daysInMonth - cycleStartDay + today;
+        const cycleLengthDays =
+            today >= cycleStartDay
+                ? daysInMonth - cycleStartDay + 1
+                : daysInMonth;
+        const daysRemaining = Math.max(1, cycleLengthDays - daysSinceCycleStart - 1);
         const dailyAllowance = (remaining / daysRemaining).toFixed(2);
 
-        // Determine status
         let status = "on-track";
         let statusIcon = CheckCircle;
         let statusColor = "text-green-600";
@@ -83,26 +92,38 @@ const GoalTracker = ({
             percentageUsed: Math.min(percentageUsed, 100),
             remaining,
             costUsed,
-            costRemaining,
             daysRemaining,
             dailyAllowance,
             status,
-            statusIcon: statusIcon,
+            statusIcon,
             statusColor,
             statusLabel,
         };
-    }, [liveData.kwhConsumption, PAYMENT_RATE, backendGoal]);
+    }, [liveData.kwhConsumption, costRate, targetKwh, cycleStartDay, backendGoal]);
 
     const StatusIcon = goalData.statusIcon;
 
     return (
         <Card className="p-4 md:p-5">
             <div className="mb-4">
-                <h3 className="text-base md:text-lg font-bold mb-1">
-                    Monthly Budget Tracker
-                </h3>
+                <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-base md:text-lg font-bold">
+                        Monthly Budget Tracker
+                    </h3>
+                    {onEditPreferences && (
+                        <button
+                            onClick={onEditPreferences}
+                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-text/50 hover:text-primary"
+                            aria-label="Edit budget preferences"
+                        >
+                            <Pencil className="w-4 h-4" />
+                        </button>
+                    )}
+                </div>
                 <p className="text-xs md:text-sm text-muted-foreground">
-                    Target: {MONTHLY_TARGET_KWH} kWh
+                    {prefsLoading
+                        ? "Loading preferences…"
+                        : `Target: ${targetKwh} kWh · ₱${costRate}/kWh`}
                 </p>
             </div>
 
