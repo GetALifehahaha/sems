@@ -1,0 +1,339 @@
+{
+  "model_path": "C:\\Users\\kirit\\Downloads\\sems\\backend\\ml_pipeline\\appliance_model.joblib",
+  "selected_round": 2,
+  "selected_mode": "targeted_boost",
+  "metrics": {
+    "accuracy": 0.4421364985163205,
+    "balanced_accuracy": 0.38005604288499023,
+    "macro_f1": 0.3820874710112958,
+    "top3_accuracy": 0.7685459940652819
+  },
+  "per_class": {
+    "Air Conditioner": {
+      "precision": 0.08333333333333333,
+      "recall": 0.125,
+      "f1_score": 0.1,
+      "support": 8
+    },
+    "Air Fryer": {
+      "precision": 0.16666666666666666,
+      "recall": 0.125,
+      "f1_score": 0.14285714285714285,
+      "support": 8
+    },
+    "Blender": {
+      "precision": 0.3333333333333333,
+      "recall": 0.5,
+      "f1_score": 0.4,
+      "support": 8
+    },
+    "CFL Bulb": {
+      "precision": 0.6363636363636364,
+      "recall": 0.875,
+      "f1_score": 0.7368421052631579,
+      "support": 8
+    },
+    "Chest Freezer": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1_score": 0.5,
+      "support": 8
+    },
+    "Clothes Iron": {
+      "precision": 0.3333333333333333,
+      "recall": 0.25,
+      "f1_score": 0.2857142857142857,
+      "support": 8
+    },
+    "Coffee Maker": {
+      "precision": 0.5714285714285714,
+      "recall": 0.5,
+      "f1_score": 0.5333333333333333,
+      "support": 8
+    },
+    "Desktop PC": {
+      "precision": 0.2222222222222222,
+      "recall": 0.25,
+      "f1_score": 0.23529411764705882,
+      "support": 8
+    },
+    "Dishwasher": {
+      "precision": 0.2857142857142857,
+      "recall": 0.25,
+      "f1_score": 0.26666666666666666,
+      "support": 8
+    },
+    "Electric Fan": {
+      "precision": 0.2857142857142857,
+      "recall": 0.25,
+      "f1_score": 0.26666666666666666,
+      "support": 8
+    },
+    "Electric Kettle": {
+      "precision": 0.3,
+      "recall": 0.375,
+      "f1_score": 0.3333333333333333,
+      "support": 8
+    },
+    "Electric Oven": {
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1_score": 0.6666666666666666,
+      "support": 8
+    },
+    "Game Console": {
+      "precision": 0.3333333333333333,
+      "recall": 0.375,
+      "f1_score": 0.35294117647058826,
+      "support": 8
+    },
+    "Hair Dryer": {
+      "precision": 0.1111111111111111,
+      "recall": 0.125,
+      "f1_score": 0.11764705882352941,
+      "support": 8
+    },
+    "Induction Cooker": {
+      "precision": 0.3333333333333333,
+      "recall": 0.375,
+      "f1_score": 0.35294117647058826,
+      "support": 8
+    },
+    "LED Bulb": {
+      "precision": 0.5555555555555556,
+      "recall": 0.625,
+      "f1_score": 0.5882352941176471,
+      "support": 8
+    },
+    "LED Monitor": {
+      "precision": 0.6666666666666666,
+      "recall": 0.5,
+      "f1_score": 0.5714285714285714,
+      "support": 8
+    },
+    "Laptop Charger": {
+      "precision": 0.9387755102040817,
+      "recall": 0.8070175438596491,
+      "f1_score": 0.8679245283018868,
+      "support": 57
+    },
+    "Microwave Oven": {
+      "precision": 0.18181818181818182,
+      "recall": 0.25,
+      "f1_score": 0.21052631578947367,
+      "support": 8
+    },
+    "Phone Charger": {
+      "precision": 0.6666666666666666,
+      "recall": 0.5,
+      "f1_score": 0.5714285714285714,
+      "support": 8
+    },
+    "Printer Active": {
+      "precision": 1.0,
+      "recall": 0.625,
+      "f1_score": 0.7692307692307693,
+      "support": 8
+    },
+    "Refrigerator Compressor": {
+      "precision": 0.4444444444444444,
+      "recall": 0.5,
+      "f1_score": 0.47058823529411764,
+      "support": 8
+    },
+    "Rice Cooker Cook": {
+      "precision": 0.2857142857142857,
+      "recall": 0.25,
+      "f1_score": 0.26666666666666666,
+      "support": 8
+    },
+    "Rice Cooker Warm": {
+      "precision": 0.2222222222222222,
+      "recall": 0.25,
+      "f1_score": 0.23529411764705882,
+      "support": 8
+    },
+    "Smart TV": {
+      "precision": 0.3333333333333333,
+      "recall": 0.375,
+      "f1_score": 0.35294117647058826,
+      "support": 8
+    },
+    "Soldering Iron": {
+      "precision": 0.2,
+      "recall": 0.375,
+      "f1_score": 0.2608695652173913,
+      "support": 8
+    },
+    "Space Heater": {
+      "precision": 0.5,
+      "recall": 0.375,
+      "f1_score": 0.42857142857142855,
+      "support": 8
+    },
+    "Stand Fan": {
+      "precision": 0.5,
+      "recall": 0.375,
+      "f1_score": 0.42857142857142855,
+      "support": 8
+    },
+    "Toaster": {
+      "precision": 0.2727272727272727,
+      "recall": 0.375,
+      "f1_score": 0.3157894736842105,
+      "support": 8
+    },
+    "Vacuum Cleaner": {
+      "precision": 0.5714285714285714,
+      "recall": 0.5,
+      "f1_score": 0.5333333333333333,
+      "support": 8
+    },
+    "Washing Machine Agitate": {
+      "precision": 0.3333333333333333,
+      "recall": 0.125,
+      "f1_score": 0.18181818181818182,
+      "support": 8
+    },
+    "Washing Machine Spin": {
+      "precision": 0.3333333333333333,
+      "recall": 0.25,
+      "f1_score": 0.2857142857142857,
+      "support": 8
+    },
+    "Water Dispenser Hot": {
+      "precision": 0.2727272727272727,
+      "recall": 0.375,
+      "f1_score": 0.3157894736842105,
+      "support": 8
+    },
+    "Water Pump": {
+      "precision": 0.2,
+      "recall": 0.25,
+      "f1_score": 0.2222222222222222,
+      "support": 8
+    },
+    "WiFi Router": {
+      "precision": 0.4,
+      "recall": 0.5,
+      "f1_score": 0.4444444444444444,
+      "support": 8
+    },
+    "Window AC": {
+      "precision": 0.16666666666666666,
+      "recall": 0.125,
+      "f1_score": 0.14285714285714285,
+      "support": 8
+    }
+  },
+  "auto_boost": {
+    "enabled": true,
+    "recall_threshold": 0.5,
+    "max_rounds": 2,
+    "min_support_for_boost": 3,
+    "selected_round": 2,
+    "selected_mode": "targeted_boost",
+    "round_summaries": [
+      {
+        "round": 0,
+        "class_weight_mode": "balanced_subsample",
+        "accuracy": 0.4421364985163205,
+        "balanced_accuracy": 0.3770711500974659,
+        "macro_f1": 0.37478872580040323,
+        "top3_accuracy": 0.7774480712166172,
+        "weak_classes_below_recall_threshold": [
+          "Air Conditioner",
+          "Air Fryer",
+          "Blender",
+          "Clothes Iron",
+          "Desktop PC",
+          "Dishwasher",
+          "Electric Fan",
+          "Game Console",
+          "Hair Dryer",
+          "Induction Cooker",
+          "Microwave Oven",
+          "Rice Cooker Cook",
+          "Rice Cooker Warm",
+          "Soldering Iron",
+          "Space Heater",
+          "Stand Fan",
+          "Toaster",
+          "Washing Machine Agitate",
+          "Washing Machine Spin",
+          "Water Dispenser Hot",
+          "Water Pump",
+          "Window AC"
+        ]
+      },
+      {
+        "round": 1,
+        "class_weight_mode": "targeted_boost",
+        "accuracy": 0.43026706231454004,
+        "balanced_accuracy": 0.36616715399610134,
+        "macro_f1": 0.3686383399036992,
+        "top3_accuracy": 0.7566765578635015,
+        "weak_classes_below_recall_threshold": [
+          "Air Conditioner",
+          "Air Fryer",
+          "Blender",
+          "Chest Freezer",
+          "Clothes Iron",
+          "Desktop PC",
+          "Dishwasher",
+          "Electric Fan",
+          "Electric Kettle",
+          "Game Console",
+          "Hair Dryer",
+          "Induction Cooker",
+          "Microwave Oven",
+          "Rice Cooker Cook",
+          "Rice Cooker Warm",
+          "Smart TV",
+          "Soldering Iron",
+          "Space Heater",
+          "Stand Fan",
+          "Toaster",
+          "Vacuum Cleaner",
+          "Washing Machine Spin",
+          "Water Dispenser Hot",
+          "Water Pump",
+          "Window AC"
+        ]
+      },
+      {
+        "round": 2,
+        "class_weight_mode": "targeted_boost",
+        "accuracy": 0.4421364985163205,
+        "balanced_accuracy": 0.38005604288499023,
+        "macro_f1": 0.3820874710112958,
+        "top3_accuracy": 0.7685459940652819,
+        "weak_classes_below_recall_threshold": [
+          "Air Conditioner",
+          "Air Fryer",
+          "Clothes Iron",
+          "Desktop PC",
+          "Dishwasher",
+          "Electric Fan",
+          "Electric Kettle",
+          "Game Console",
+          "Hair Dryer",
+          "Induction Cooker",
+          "Microwave Oven",
+          "Rice Cooker Cook",
+          "Rice Cooker Warm",
+          "Smart TV",
+          "Soldering Iron",
+          "Space Heater",
+          "Stand Fan",
+          "Toaster",
+          "Washing Machine Agitate",
+          "Washing Machine Spin",
+          "Water Dispenser Hot",
+          "Water Pump",
+          "Window AC"
+        ]
+      }
+    ]
+  }
+}
