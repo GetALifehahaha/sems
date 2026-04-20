@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+import csv
+import os
 from django.utils import timezone  # type: ignore
 from django.db.models import Avg, Max, Min  # type: ignore
 from django.db.models.functions import ExtractHour, TruncDate, TruncDay, TruncMonth, TruncWeek  # type: ignore
@@ -37,6 +39,22 @@ def _to_int(value, default=0):
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def _to_bool(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"1", "true", "yes", "y", "on"}:
+            return True
+        if normalized in {"0", "false", "no", "n", "off"}:
+            return False
+    if isinstance(value, (int, float)):
+        return value != 0
+    return default
 
 
 def _usage_between(start_dt, end_dt):
@@ -114,6 +132,11 @@ def _resolve_dashboard_settings(request, now):
         "cycle_start": cycle_start,
         "cycle_end": cycle_end,
     }
+
+
+def _nilp_dataset_path():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(current_dir, "..", "ml_pipeline", "my_appliances_dataset.csv")
 
 
 def _to_period_datetime(date_str, is_end):
@@ -627,6 +650,80 @@ class ElectricalNotificationsView(APIView):
             )
 
         return Response(notifications, status=status.HTTP_200_OK)
+
+
+class NilpFeedbackView(APIView):
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def post(self, request):
+        appliance_name = str(request.data.get("appliance_name", "")).strip()
+        power_jump_raw = request.data.get("power_jump_watts", request.data.get("power_jump"))
+        current_jump_raw = request.data.get("current_jump_amps", request.data.get("current_jump"))
+        retrain_now = _to_bool(request.data.get("retrain_now"), default=True)
+
+        if not appliance_name:
+            return Response(
+                {"detail": "appliance_name is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            power_jump = float(power_jump_raw)
+            current_jump = float(current_jump_raw)
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "power_jump and current_jump must be numeric."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        dataset_path = _nilp_dataset_path()
+        file_exists = os.path.exists(dataset_path)
+
+        try:
+            with open(dataset_path, "a", newline="", encoding="utf-8") as csvfile:
+                writer = csv.writer(csvfile)
+
+                if not file_exists or os.path.getsize(dataset_path) == 0:
+                    writer.writerow(["Power_Jump_Watts", "Current_Jump_Amps", "Appliance_Name"])
+
+                writer.writerow([power_jump, current_jump, appliance_name])
+        except OSError as error:
+            return Response(
+                {"detail": f"Failed to save NILP feedback: {error}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        retrained = False
+        model_reloaded = False
+        training_error = None
+
+        if retrain_now:
+            try:
+                from ml_pipeline.train_model import train_and_save_model
+                from .ml_service import appliance_ai
+
+                train_and_save_model()
+                retrained = True
+                model_reloaded = bool(appliance_ai.reload_model())
+            except Exception as error:
+                training_error = str(error)
+
+        return Response(
+            {
+                "status": "saved",
+                "row": {
+                    "Power_Jump_Watts": power_jump,
+                    "Current_Jump_Amps": current_jump,
+                    "Appliance_Name": appliance_name,
+                },
+                "retrain_requested": retrain_now,
+                "retrained": retrained,
+                "model_reloaded": model_reloaded,
+                "training_error": training_error,
+            },
+            status=status.HTTP_201_CREATED,
+        )
     
 from django.http import JsonResponse
 

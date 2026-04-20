@@ -9,6 +9,7 @@ const DEFAULT_PREFERENCES = {
 };
 
 const PREFERENCES_ENDPOINT = "/electrical/preferences/";
+const NILP_FEEDBACK_ENDPOINT = "/electrical/nilp-feedback/";
 const PREFERENCES_STORAGE_KEY = "sems.preferences";
 
 const normalizePreferences = (payload = {}) => ({
@@ -95,6 +96,10 @@ export const patchJson = async (path, body, { signal, query } = {}) => {
     return requestJson(path, { method: "PATCH", signal, query, body });
 };
 
+export const postJson = async (path, body, { signal, query } = {}) => {
+    return requestJson(path, { method: "POST", signal, query, body });
+};
+
 export const getPreferences = async (signal) => {
     try {
         const remotePreferences = await fetchJson(PREFERENCES_ENDPOINT, { signal });
@@ -130,4 +135,20 @@ export const updatePreferences = async (payload, { signal } = {}) => {
         storePreferences(normalizedPayload);
         return normalizedPayload;
     }
+};
+
+export const submitNilpFeedback = async (
+    { applianceName, powerJumpWatts, currentJumpAmps, retrainNow = true },
+    { signal } = {}
+) => {
+    return postJson(
+        NILP_FEEDBACK_ENDPOINT,
+        {
+            appliance_name: applianceName,
+            power_jump_watts: powerJumpWatts,
+            current_jump_amps: currentJumpAmps,
+            retrain_now: retrainNow,
+        },
+        { signal }
+    );
 };

@@ -11,6 +11,7 @@ from .views import (
     DashboardHourlyBreakdownView,
     DashboardHistoricalComparisonView,
     ElectricalNotificationsView,
+    NilpFeedbackView,
     discover,
 )
 
@@ -34,5 +35,6 @@ urlpatterns = [
 
     # Alerts
     path("notifications/", ElectricalNotificationsView.as_view(), name="notifications"),
+    path("nilp-feedback/", NilpFeedbackView.as_view(), name="nilp-feedback"),
     path("discover/", discover),
 ]

@@ -21,9 +21,10 @@ import {
     usePreferences,
 } from "..";
 import { Zap, Monitor, Fan, Coffee, Plug, Lightbulb, Tv, Activity } from "lucide-react";
-import { fetchJson } from "@/shared";
+import { fetchJson, submitNilpFeedback } from "@/shared";
 
 const FREQUENCY_OPTIONS = ["daily", "weekly", "monthly"];
+const FEEDBACK_HISTORY_KEY = "sems.nilp.feedbackHistory";
 
 const getWsUrl = () => {
     const baseUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000";
@@ -38,6 +39,28 @@ const getApplianceIcon = (applianceName) => {
     if (name.includes("light") || name.includes("bulb")) return <Lightbulb className="w-5 h-5 text-yellow-500" />;
     if (name.includes("tv") || name.includes("television")) return <Tv className="w-5 h-5 text-indigo-500" />;
     return <Plug className="w-5 h-5 text-gray-500" />;
+};
+
+const getConfidenceMeta = (rawConfidence) => {
+    const confidence = Number(rawConfidence) || 0;
+    if (confidence >= 0.75) {
+        return {
+            label: `High ${(confidence * 100).toFixed(0)}%`,
+            className: "bg-green-100 text-green-700",
+        };
+    }
+
+    if (confidence >= 0.5) {
+        return {
+            label: `Medium ${(confidence * 100).toFixed(0)}%`,
+            className: "bg-amber-100 text-amber-700",
+        };
+    }
+
+    return {
+        label: `Low ${(confidence * 100).toFixed(0)}%`,
+        className: "bg-red-100 text-red-700",
+    };
 };
 
 const Dashboard = () => {
@@ -58,8 +81,38 @@ const Dashboard = () => {
     const [isLiveLoading, setIsLiveLoading] = useState(true);
     const [liveError, setLiveError] = useState("");
     const [lastUpdated, setLastUpdated] = useState(null);
+    const [feedbackBusyId, setFeedbackBusyId] = useState(null);
+    const [feedbackNotice, setFeedbackNotice] = useState(null);
+    const [feedbackHistory, setFeedbackHistory] = useState([]);
 
     const startOfDayOffset = useRef(0);
+
+    useEffect(() => {
+        try {
+            const raw = window.localStorage.getItem(FEEDBACK_HISTORY_KEY);
+            if (!raw) {
+                return;
+            }
+
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                setFeedbackHistory(parsed.slice(0, 8));
+            }
+        } catch {
+            // Ignore localStorage parse errors and start with empty history.
+        }
+    }, []);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(
+                FEEDBACK_HISTORY_KEY,
+                JSON.stringify(feedbackHistory.slice(0, 8))
+            );
+        } catch {
+            // Ignore localStorage write errors.
+        }
+    }, [feedbackHistory]);
 
     useEffect(() => {
         let activeController = new AbortController();
@@ -174,6 +227,98 @@ const Dashboard = () => {
         startTransition(() => {
             setFrequency(value);
         });
+    }, []);
+
+    const handleNilpFeedback = useCallback(async (app) => {
+        if (!app) {
+            return;
+        }
+
+        const suggested = String(app.name || "").trim();
+        const previousLabel = suggested;
+        const correctedName = window.prompt(
+            "Correct appliance label:",
+            suggested
+        );
+
+        if (!correctedName) {
+            return;
+        }
+
+        const trimmedName = correctedName.trim();
+        if (!trimmedName) {
+            return;
+        }
+
+        const feedbackId = app.id || `${app.name}-${app.power}-${app.current}`;
+        setFeedbackBusyId(feedbackId);
+
+        try {
+            const response = await submitNilpFeedback({
+                applianceName: trimmedName,
+                powerJumpWatts: Number(app.power) || 0,
+                currentJumpAmps: Number(app.current) || 0,
+                retrainNow: true,
+            });
+
+            setLiveData((prev) => ({
+                ...prev,
+                activeAppliances: (prev.activeAppliances || []).map((item) => {
+                    const isTarget = item.id
+                        ? item.id === app.id
+                        : item.name === app.name &&
+                          Number(item.power) === Number(app.power) &&
+                          Number(item.current) === Number(app.current);
+
+                    if (!isTarget) {
+                        return item;
+                    }
+
+                    return {
+                        ...item,
+                        name: trimmedName,
+                        confidence: 1,
+                        candidates: [],
+                    };
+                }),
+            }));
+
+            const retrained = Boolean(response?.retrained);
+            const reloaded = Boolean(response?.model_reloaded);
+            const trainingError = response?.training_error;
+
+            setFeedbackNotice({
+                type: retrained && reloaded && !trainingError ? "success" : "error",
+                text:
+                    retrained && reloaded && !trainingError
+                        ? `Saved correction: ${trimmedName} (model updated)`
+                        : trainingError
+                          ? `Saved correction, but retrain failed: ${trainingError}`
+                          : "Saved correction, but model was not reloaded.",
+            });
+
+            setFeedbackHistory((prev) => [
+                {
+                    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    previousLabel,
+                    correctedLabel: trimmedName,
+                    power: Number(app.power) || 0,
+                    current: Number(app.current) || 0,
+                    retrained,
+                    reloaded,
+                    trainingError: trainingError || null,
+                    createdAt: new Date().toISOString(),
+                },
+                ...prev,
+            ].slice(0, 8));
+        } catch {
+            setFeedbackNotice({
+                type: "error",
+                text: "Failed to save correction. Please try again.",
+            });
+        } finally {
+            setFeedbackBusyId(null);
+        }
     }, []);
 
     const formattedLiveData = isLiveLoading
@@ -317,6 +462,44 @@ const Dashboard = () => {
 
                                 {/* Scrolling Box */}
                                 <div className="max-h-72 overflow-y-auto pr-2 pb-2 custom-scrollbar">
+                                    {feedbackNotice && (
+                                        <div
+                                            className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium ${
+                                                feedbackNotice.type === "success"
+                                                    ? "bg-green-50 text-green-700 border border-green-200"
+                                                    : "bg-red-50 text-red-700 border border-red-200"
+                                            }`}
+                                        >
+                                            {feedbackNotice.text}
+                                        </div>
+                                    )}
+
+                                    {feedbackHistory.length > 0 && (
+                                        <div className="mb-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+                                            <p className="text-[11px] font-bold text-muted-foreground uppercase mb-2">
+                                                Recent Label Corrections
+                                            </p>
+                                            <div className="space-y-2">
+                                                {feedbackHistory.slice(0, 4).map((entry) => (
+                                                    <div key={entry.id} className="text-[11px] leading-snug">
+                                                        <p className="font-semibold text-text/80">
+                                                            {entry.previousLabel || "Unknown"} → {entry.correctedLabel}
+                                                        </p>
+                                                        <p className="text-muted-foreground">
+                                                            {new Date(entry.createdAt).toLocaleTimeString([], {
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                            })}
+                                                            {entry.retrained && entry.reloaded
+                                                                ? " • model updated"
+                                                                : " • pending model refresh"}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {liveData.power < 2 || !liveData.activeAppliances || liveData.activeAppliances.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-xl border border-border/50">
                                             <Plug className="w-8 h-8 text-muted-foreground mb-2 opacity-50" />
@@ -327,8 +510,17 @@ const Dashboard = () => {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {liveData.activeAppliances.map((app, idx) => {
                                                 const costPerHour = ((app.power / 1000) * paymentRate).toFixed(2);
+                                                const confidenceMeta = getConfidenceMeta(app.confidence);
+                                                const feedbackId = app.id || `${app.name}-${idx}`;
+                                                const candidateLabels = Array.isArray(app.candidates)
+                                                    ? app.candidates
+                                                        .filter((candidate) => candidate?.label && candidate.label !== app.name)
+                                                        .slice(0, 2)
+                                                        .map((candidate) => `${candidate.label} ${(Number(candidate.confidence || 0) * 100).toFixed(0)}%`)
+                                                    : [];
+
                                                 return (
-                                                    <div key={idx} className="flex flex-col p-4 bg-white rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div key={feedbackId} className="flex flex-col p-4 bg-white rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-shadow">
                                                         <div className="flex justify-between items-start mb-3">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="p-1.5 bg-muted/50 rounded-lg">
@@ -336,7 +528,12 @@ const Dashboard = () => {
                                                                 </div>
                                                                 <span className="text-sm font-bold text-text/90 capitalize">{app.name}</span>
                                                             </div>
-                                                            <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">ACTIVE</span>
+                                                            <div className="flex flex-col items-end gap-1">
+                                                                <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">ACTIVE</span>
+                                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${confidenceMeta.className}`}>
+                                                                    {confidenceMeta.label}
+                                                                </span>
+                                                            </div>
                                                         </div>
 
                                                         <div className="grid grid-cols-2 gap-y-3 gap-x-2 mt-1">
@@ -357,6 +554,23 @@ const Dashboard = () => {
                                                                 <p className="text-sm font-bold text-primary">₱{costPerHour} <span className="text-[10px] text-primary/70 font-normal">/hr</span></p>
                                                             </div>
                                                         </div>
+
+                                                        {candidateLabels.length > 0 && (
+                                                            <p className="mt-3 text-[11px] text-muted-foreground leading-snug">
+                                                                Possible: {candidateLabels.join(", ")}
+                                                            </p>
+                                                        )}
+
+                                                        <button
+                                                            type="button"
+                                                            disabled={feedbackBusyId === feedbackId}
+                                                            onClick={() => handleNilpFeedback(app)}
+                                                            className="mt-3 text-[11px] font-semibold text-primary hover:text-primary/80 disabled:opacity-60 disabled:cursor-not-allowed text-left"
+                                                        >
+                                                            {feedbackBusyId === feedbackId
+                                                                ? "Saving correction..."
+                                                                : "Correct label"}
+                                                        </button>
                                                     </div>
                                                 );
                                             })}

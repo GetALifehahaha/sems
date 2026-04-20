@@ -18,6 +18,8 @@ export {
     buildUrl,
     fetchJson,
     patchJson,
+    postJson,
     getPreferences,
     updatePreferences,
+    submitNilpFeedback,
 } from "./utils/api.js";
