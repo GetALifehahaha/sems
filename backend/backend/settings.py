@@ -46,6 +46,7 @@ REST_FRAMEWORK = {
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',  # Must be at the very top to take over the server!
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'channels', # Adds WebSocket support
     'rest_framework',
     'electrical_processing',
     'corsheaders',
@@ -87,8 +89,15 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+# We changed this from WSGI to ASGI
+ASGI_APPLICATION = 'backend.asgi.application'
 
+# Configure the Channel Layer (In-memory for development)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -148,6 +157,16 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
+
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "ngrok-skip-browser-warning",
+)
 
 # SECURITY
 SECURE_SSL_REDIRECT = not DEBUG

@@ -13,7 +13,17 @@ const GoalTracker = ({
     prefsLoading = false,
     onEditPreferences,
 }) => {
-    const [backendGoal, setBackendGoal] = useState(null);
+    const [backendGoal, setBackendGoal] = useState({
+        kwh_used: 0,
+        monthly_target_kwh: 150,
+        percentage_used: 0,
+        remaining: 150,
+        days_remaining: 30,
+        daily_allowance: 0,
+        cost_used: 0,
+        cost_remaining: 0,
+        status: "on-track",
+    });
 
     useEffect(() => {
         const controller = new AbortController();
@@ -32,7 +42,17 @@ const GoalTracker = ({
                 );
                 setBackendGoal(data);
             } catch {
-                setBackendGoal(null);
+                setBackendGoal({
+                    kwh_used: 0,
+                    monthly_target_kwh: 150,
+                    percentage_used: 0,
+                    remaining: 150,
+                    days_remaining: 30,
+                    daily_allowance: 0,
+                    cost_used: 0,
+                    cost_remaining: 0,
+                    status: "on-track",
+                });
             }
         };
 
@@ -42,35 +62,16 @@ const GoalTracker = ({
     }, [liveData.kwhConsumption, costRate, isLoading]);
 
     const goalData = useMemo(() => {
-        const kwhUsed =
-            backendGoal?.kwh_used !== undefined
-                ? Number(backendGoal.kwh_used)
-                : Number(liveData.kwhConsumption) || 0;
-        const percentageUsed = (kwhUsed / targetKwh) * 100;
-        const remaining = Math.max(0, targetKwh - kwhUsed);
-        const costUsed =
-            backendGoal?.cost_used !== undefined
-                ? Number(backendGoal.cost_used).toFixed(2)
-                : (kwhUsed * costRate).toFixed(2);
+        const monthlyTargetKwh = Number(backendGoal?.monthly_target_kwh) || 150;
+        const kwhUsed = Number(backendGoal?.kwh_used) || 0;
+        const percentageUsed = Number(backendGoal?.percentage_used) || 0;
+        const remaining = Number(backendGoal?.remaining) || 0;
+        const costUsed = (Number(backendGoal?.cost_used) || 0).toFixed(2);
+        const costRemaining = (Number(backendGoal?.cost_remaining) || 0).toFixed(2);
+        const daysRemaining = Number(backendGoal?.days_remaining) || 1;
+        const dailyAllowance = (Number(backendGoal?.daily_allowance) || 0).toFixed(2);
 
-        const today = new Date().getDate();
-        const daysInMonth = new Date(
-            new Date().getFullYear(),
-            new Date().getMonth() + 1,
-            0,
-        ).getDate();
-        const daysSinceCycleStart =
-            today >= cycleStartDay
-                ? today - cycleStartDay
-                : daysInMonth - cycleStartDay + today;
-        const cycleLengthDays =
-            today >= cycleStartDay
-                ? daysInMonth - cycleStartDay + 1
-                : daysInMonth;
-        const daysRemaining = Math.max(1, cycleLengthDays - daysSinceCycleStart - 1);
-        const dailyAllowance = (remaining / daysRemaining).toFixed(2);
-
-        let status = "on-track";
+        let status = backendGoal?.status || "on-track";
         let statusIcon = CheckCircle;
         let statusColor = "text-green-600";
         let statusLabel = "On Track";
@@ -91,6 +92,7 @@ const GoalTracker = ({
             kwhUsed,
             percentageUsed: Math.min(percentageUsed, 100),
             remaining,
+            monthlyTargetKwh,
             costUsed,
             daysRemaining,
             dailyAllowance,
@@ -99,7 +101,7 @@ const GoalTracker = ({
             statusColor,
             statusLabel,
         };
-    }, [liveData.kwhConsumption, costRate, targetKwh, cycleStartDay, backendGoal]);
+    }, [backendGoal]);
 
     const StatusIcon = goalData.statusIcon;
 
@@ -121,9 +123,7 @@ const GoalTracker = ({
                     )}
                 </div>
                 <p className="text-xs md:text-sm text-muted-foreground">
-                    {prefsLoading
-                        ? "Loading preferences…"
-                        : `Target: ${targetKwh} kWh · ₱${costRate}/kWh`}
+                    Target: {goalData.monthlyTargetKwh} kWh
                 </p>
             </div>
 
@@ -147,13 +147,12 @@ const GoalTracker = ({
                         </div>
                         <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                             <div
-                                className={`h-full rounded-full transition-all duration-300 ${
-                                    goalData.status === "on-track"
+                                className={`h-full rounded-full transition-all duration-300 ${goalData.status === "on-track"
                                         ? "bg-green-500"
                                         : goalData.status === "at-risk"
-                                          ? "bg-orange-500"
-                                          : "bg-red-500"
-                                }`}
+                                            ? "bg-orange-500"
+                                            : "bg-red-500"
+                                    }`}
                                 style={{ width: `${goalData.percentageUsed}%` }}
                             />
                         </div>
@@ -200,8 +199,8 @@ const GoalTracker = ({
                                 goalData.status === "on-track"
                                     ? "default"
                                     : goalData.status === "at-risk"
-                                      ? "secondary"
-                                      : "destructive"
+                                        ? "secondary"
+                                        : "destructive"
                             }
                             className="flex items-center gap-2"
                         >
