@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "defaults": {
+    "confidence_floor": 0.5,
+    "voltage_nominal": 230
+  },
+  "appliances": [
+    {
+      "label": "Fan",
+      "rated_watts": 60,
+      "power_on_min": 15,
+      "power_on_max": 60,
+      "current_on_min": 0.06,
+      "current_on_max": 0.3,
+      "load_type": "inductive_motor",
+      "confidence_floor": 0.56
+    },
+    {
+      "label": "Laptop Charger",
+      "rated_watts": 60,
+      "power_on_min": 20,
+      "power_on_max": 65,
+      "current_on_min": 0.08,
+      "current_on_max": 0.32,
+      "load_type": "switching_supply",
+      "confidence_floor": 0.58
+    },
+    {
+      "label": "Phone Charger",
+      "rated_watts": 12,
+      "power_on_min": 3,
+      "power_on_max": 15,
+      "current_on_min": 0.02,
+      "current_on_max": 0.1,
+      "load_type": "switching_supply",
+      "confidence_floor": 0.6
+    }
+  ]
+}

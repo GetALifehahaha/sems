@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime, timezone
 
 import joblib
 import pandas as pd
@@ -8,26 +9,93 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, classificat
 from sklearn.model_selection import train_test_split
 
 
-FEATURE_COLUMNS = ["Power_Jump_Watts", "Current_Jump_Amps"]
+POWER_COLUMN = "Power_Jump_Watts"
+CURRENT_COLUMN = "Current_Jump_Amps"
+EVENT_COLUMN = "Event_Type"
+SOURCE_COLUMN = "Source"
 TARGET_COLUMN = "Appliance_Name"
-MIN_TOTAL_ROWS = 10
+FEATURE_COLUMNS = [
+    "Power_Jump_Abs_Watts",
+    "Current_Jump_Abs_Amps",
+    "Event_Type_Code",
+    "Power_Current_Ratio",
+]
+MIN_TOTAL_ROWS = 16
+
+
+def _to_float(value, default=0.0):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _normalize_event_type(raw_event, power_jump):
+    event_value = str(raw_event or "").strip().upper()
+    if event_value in {"ON", "OFF"}:
+        return event_value
+    return "OFF" if _to_float(power_jump) < 0 else "ON"
+
+
+def _source_weight(source_name):
+    source = str(source_name or "").strip().lower()
+    if not source:
+        return 1.0
+
+    if "synthetic" in source:
+        return 0.55
+    if "feedback" in source:
+        return 1.7
+    if "collector" in source or "manual" in source:
+        return 1.35
+    if "user" in source:
+        return 1.45
+    return 1.0
 
 
 def _clean_dataset(df):
-    required_columns = FEATURE_COLUMNS + [TARGET_COLUMN]
+    required_columns = [POWER_COLUMN, CURRENT_COLUMN, TARGET_COLUMN]
     missing_columns = [col for col in required_columns if col not in df.columns]
     if missing_columns:
         raise ValueError(f"Missing required columns: {', '.join(missing_columns)}")
 
-    cleaned = df[required_columns].copy()
-    cleaned["Power_Jump_Watts"] = pd.to_numeric(cleaned["Power_Jump_Watts"], errors="coerce")
-    cleaned["Current_Jump_Amps"] = pd.to_numeric(cleaned["Current_Jump_Amps"], errors="coerce")
+    cleaned = df.copy()
+    cleaned[POWER_COLUMN] = pd.to_numeric(cleaned[POWER_COLUMN], errors="coerce")
+    cleaned[CURRENT_COLUMN] = pd.to_numeric(cleaned[CURRENT_COLUMN], errors="coerce")
     cleaned[TARGET_COLUMN] = cleaned[TARGET_COLUMN].astype(str).str.strip()
+
+    if EVENT_COLUMN not in cleaned.columns:
+        cleaned[EVENT_COLUMN] = ""
+    if SOURCE_COLUMN not in cleaned.columns:
+        cleaned[SOURCE_COLUMN] = "unknown"
+
+    cleaned[EVENT_COLUMN] = cleaned.apply(
+        lambda row: _normalize_event_type(row.get(EVENT_COLUMN, ""), row.get(POWER_COLUMN, 0.0)),
+        axis=1,
+    )
+    cleaned[SOURCE_COLUMN] = cleaned[SOURCE_COLUMN].astype(str).str.strip().replace("", "unknown")
 
     cleaned = cleaned.dropna(subset=required_columns)
     cleaned = cleaned[cleaned[TARGET_COLUMN] != ""]
     cleaned = cleaned[cleaned[TARGET_COLUMN].str.lower() != "nan"]
+
+    cleaned["Power_Jump_Abs_Watts"] = cleaned[POWER_COLUMN].abs()
+    cleaned["Current_Jump_Abs_Amps"] = cleaned[CURRENT_COLUMN].abs()
+    cleaned["Event_Type_Code"] = cleaned[EVENT_COLUMN].apply(lambda value: 1.0 if value == "ON" else 0.0)
+
+    ratio_denominator = cleaned["Current_Jump_Abs_Amps"].replace(0, 0.01)
+    cleaned["Power_Current_Ratio"] = (cleaned["Power_Jump_Abs_Watts"] / ratio_denominator).clip(lower=0.0, upper=2500.0)
+
+    for feature_column in FEATURE_COLUMNS:
+        cleaned[feature_column] = pd.to_numeric(cleaned[feature_column], errors="coerce")
+
+    cleaned = cleaned.dropna(subset=FEATURE_COLUMNS)
+
     return cleaned
+
+
+def _build_sample_weights(df):
+    return df[SOURCE_COLUMN].apply(_source_weight).astype(float)
 
 
 def _compute_top3_accuracy(model, x_test, y_test):
@@ -84,6 +152,7 @@ def train_and_save_model():
 
     x = df[FEATURE_COLUMNS]
     y = df[TARGET_COLUMN]
+    sample_weights = _build_sample_weights(df)
 
     class_counts = y.value_counts()
     if len(class_counts) < 2:
@@ -94,13 +163,19 @@ def train_and_save_model():
     if stratify_target is None:
         print("⚠️ Some classes have fewer than 2 samples. Training without stratification.")
 
-    x_train, x_test, y_train, y_test = train_test_split(
-        x,
-        y,
+    indices = list(df.index)
+    train_idx, test_idx = train_test_split(
+        indices,
         test_size=0.2,
         random_state=42,
         stratify=stratify_target,
     )
+
+    x_train = x.loc[train_idx]
+    x_test = x.loc[test_idx]
+    y_train = y.loc[train_idx]
+    y_test = y.loc[test_idx]
+    w_train = sample_weights.loc[train_idx]
 
     print(f"🧠 Training RandomForest on {len(x_train)} samples...")
     model = RandomForestClassifier(
@@ -109,7 +184,7 @@ def train_and_save_model():
         class_weight="balanced_subsample",
         n_jobs=-1,
     )
-    model.fit(x_train, y_train)
+    model.fit(x_train, y_train, sample_weight=w_train)
 
     predictions = model.predict(x_test)
 
@@ -131,7 +206,27 @@ def train_and_save_model():
     }
 
     model_path = os.path.join(current_dir, "appliance_model.joblib")
-    joblib.dump(model, model_path)
+    model_bundle = {
+        "model": model,
+        "feature_columns": FEATURE_COLUMNS,
+        "metadata": {
+            "version": "schema_v3",
+            "trained_at": datetime.now(timezone.utc).isoformat(),
+            "event_mapping": {"ON": 1.0, "OFF": 0.0},
+            "source_weighting": {
+                "synthetic": 0.55,
+                "feedback": 1.7,
+                "user": 1.45,
+                "collector": 1.35,
+            },
+        },
+    }
+    joblib.dump(model_bundle, model_path)
+
+    source_distribution = {
+        str(label): int(count)
+        for label, count in df[SOURCE_COLUMN].value_counts().items()
+    }
 
     model_report = {
         "model_path": model_path,
@@ -142,6 +237,11 @@ def train_and_save_model():
             "test_rows": int(len(x_test)),
             "class_distribution": {str(label): int(count) for label, count in class_counts.items()},
             "features": FEATURE_COLUMNS,
+            "event_distribution": {
+                str(label): int(count)
+                for label, count in df[EVENT_COLUMN].value_counts().items()
+            },
+            "source_distribution": source_distribution,
         },
         "metrics": {
             "accuracy": float(accuracy),

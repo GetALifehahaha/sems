@@ -22,7 +22,7 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         # thresholds
         self.base_threshold = 2.5
         self.min_prediction_confidence = 0.50
-        self.off_confidence_floor = 0.35
+        self.off_confidence_floor = 0.50
 
         # debounce control (prevents spam detection)
         self.last_event_time = 0
@@ -51,7 +51,59 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         except (TypeError, ValueError):
             return default
 
+    def _find_similar_active_index(self, name, target_power, target_current):
+        normalized_name = str(name or "").strip().lower()
+        if not normalized_name:
+            return None
+
+        best_index = None
+        best_score = None
+
+        for idx, appliance in enumerate(self.active_appliances):
+            appliance_name = str(appliance.get("name", "")).strip().lower()
+            if appliance_name != normalized_name:
+                continue
+
+            power_gap = abs(float(appliance.get("power", 0.0)) - abs(target_power))
+            current_gap = abs(float(appliance.get("current", 0.0)) - abs(target_current))
+            score = power_gap + (current_gap * 100)
+
+            if power_gap > 8.0 or current_gap > 0.08:
+                continue
+
+            if best_score is None or score < best_score:
+                best_score = score
+                best_index = idx
+
+        return best_index
+
+    def _active_counts(self):
+        active_device_count = len(self.active_appliances)
+        active_type_count = len(
+            {
+                str(appliance.get("name", "")).strip().lower()
+                for appliance in self.active_appliances
+                if str(appliance.get("name", "")).strip()
+            }
+        )
+        return active_device_count, active_type_count
+
     def _add_active_appliance(self, name, power, current, voltage, confidence, top_candidates):
+        existing_index = self._find_similar_active_index(name, power, current)
+
+        if existing_index is not None:
+            existing_id = self.active_appliances[existing_index].get("id", f"appliance_{existing_index + 1}")
+            self.active_appliances[existing_index] = {
+                "id": existing_id,
+                "name": name,
+                "power": round(abs(power), 1),
+                "current": round(abs(current), 3),
+                "voltage": round(voltage, 1),
+                "confidence": round(confidence, 4),
+                "candidates": top_candidates,
+            }
+            return
+
         self.appliance_counter += 1
         self.active_appliances.append(
             {
@@ -156,6 +208,7 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
                 prediction = appliance_ai.predict_with_confidence(
                     power_jump=delta_power,
                     current_jump=delta_current,
+                    event_type="ON",
                 )
 
                 predicted_label = prediction.get("label")
@@ -186,6 +239,7 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
                 prediction = appliance_ai.predict_with_confidence(
                     power_jump=abs(delta_power),
                     current_jump=abs(delta_current),
+                    event_type="OFF",
                 )
 
                 predicted_label = None
@@ -206,7 +260,7 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
 
         if self.last_power == 0.0 and power > 2.5 and not self.active_appliances:
             try:
-                prediction = appliance_ai.predict_with_confidence(power, current)
+                prediction = appliance_ai.predict_with_confidence(power, current, event_type="ON")
                 predicted_label = prediction.get("label")
                 confidence = float(prediction.get("confidence", 0.0))
 
@@ -233,6 +287,9 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
 
         # attach appliance list
         data["active_appliances"] = list(self.active_appliances)
+        active_device_count, active_type_count = self._active_counts()
+        data["active_device_count"] = active_device_count
+        data["active_type_count"] = active_type_count
 
         # save to DB
         await self.save_reading(data)

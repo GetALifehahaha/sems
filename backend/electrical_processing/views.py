@@ -679,15 +679,46 @@ class NilpFeedbackView(APIView):
 
         dataset_path = _nilp_dataset_path()
         file_exists = os.path.exists(dataset_path)
+        dataset_columns = []
+
+        if file_exists and os.path.getsize(dataset_path) > 0:
+            try:
+                with open(dataset_path, "r", newline="", encoding="utf-8") as csvfile:
+                    reader = csv.reader(csvfile)
+                    dataset_columns = [str(column).strip() for column in next(reader, []) if str(column).strip()]
+            except OSError:
+                dataset_columns = []
+
+        extended_header = [
+            "Power_Jump_Watts",
+            "Current_Jump_Amps",
+            "Appliance_Name",
+            "Event_Type",
+            "Source",
+            "Rated_Watts_Ref",
+        ]
 
         try:
             with open(dataset_path, "a", newline="", encoding="utf-8") as csvfile:
                 writer = csv.writer(csvfile)
 
                 if not file_exists or os.path.getsize(dataset_path) == 0:
-                    writer.writerow(["Power_Jump_Watts", "Current_Jump_Amps", "Appliance_Name"])
+                    writer.writerow(extended_header)
+                    dataset_columns = list(extended_header)
 
-                writer.writerow([power_jump, current_jump, appliance_name])
+                normalized_columns = [column.lower() for column in dataset_columns]
+                if "event_type" not in normalized_columns or "source" not in normalized_columns:
+                    writer.writerow([power_jump, current_jump, appliance_name])
+                else:
+                    row_by_column = {
+                        "power_jump_watts": power_jump,
+                        "current_jump_amps": current_jump,
+                        "appliance_name": appliance_name,
+                        "event_type": "ON",
+                        "source": "feedback_correction",
+                        "rated_watts_ref": "",
+                    }
+                    writer.writerow([row_by_column.get(column.lower(), "") for column in dataset_columns])
         except OSError as error:
             return Response(
                 {"detail": f"Failed to save NILP feedback: {error}"},
@@ -716,6 +747,8 @@ class NilpFeedbackView(APIView):
                     "Power_Jump_Watts": power_jump,
                     "Current_Jump_Amps": current_jump,
                     "Appliance_Name": appliance_name,
+                    "Event_Type": "ON",
+                    "Source": "feedback_correction",
                 },
                 "retrain_requested": retrain_now,
                 "retrained": retrained,

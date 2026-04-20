@@ -25,6 +25,31 @@ import { fetchJson, submitNilpFeedback } from "@/shared";
 
 const FREQUENCY_OPTIONS = ["daily", "weekly", "monthly"];
 const FEEDBACK_HISTORY_KEY = "sems.nilp.feedbackHistory";
+const ACTIVE_CARD_CONFIDENCE_THRESHOLD = 0.75;
+const POSSIBLE_CARD_CONFIDENCE_THRESHOLD = 0.4;
+
+const deriveActiveCounts = (activeAppliances = [], activeDeviceCount, activeTypeCount) => {
+    const safeAppliances = Array.isArray(activeAppliances) ? activeAppliances : [];
+
+    const fallbackDeviceCount = safeAppliances.length;
+    const fallbackTypeCount = new Set(
+        safeAppliances
+            .map((item) => String(item?.name || "").trim().toLowerCase())
+            .filter(Boolean)
+    ).size;
+
+    const parsedDeviceCount = Number(activeDeviceCount);
+    const parsedTypeCount = Number(activeTypeCount);
+
+    return {
+        activeDeviceCount: Number.isFinite(parsedDeviceCount) && parsedDeviceCount >= 0
+            ? parsedDeviceCount
+            : fallbackDeviceCount,
+        activeTypeCount: Number.isFinite(parsedTypeCount) && parsedTypeCount >= 0
+            ? parsedTypeCount
+            : fallbackTypeCount,
+    };
+};
 
 const getWsUrl = () => {
     const baseUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000";
@@ -76,7 +101,9 @@ const Dashboard = () => {
         kwhConsumption: 0,
         todayKwhUsage: 0,
         monthKwhUsage: 0,
-        activeAppliances: []
+        activeAppliances: [],
+        activeDeviceCount: 0,
+        activeTypeCount: 0,
     });
     const [isLiveLoading, setIsLiveLoading] = useState(true);
     const [liveError, setLiveError] = useState("");
@@ -124,6 +151,12 @@ const Dashboard = () => {
 
                 const initialKwh = Number(data.kwh_consumption) || 0;
                 const initialToday = Number(data.today_kwh_usage) || 0;
+                const activeAppliances = data.active_appliances || [];
+                const counts = deriveActiveCounts(
+                    activeAppliances,
+                    data.active_device_count,
+                    data.active_type_count
+                );
 
                 startOfDayOffset.current = initialKwh - initialToday;
 
@@ -134,7 +167,9 @@ const Dashboard = () => {
                     kwhConsumption: initialKwh,
                     todayKwhUsage: initialToday,
                     monthKwhUsage: Number(data.month_kwh_usage) || 0,
-                    activeAppliances: data.active_appliances || []
+                    activeAppliances,
+                    activeDeviceCount: counts.activeDeviceCount,
+                    activeTypeCount: counts.activeTypeCount,
                 });
                 setLastUpdated(new Date());
                 setIsLiveLoading(false);
@@ -171,6 +206,12 @@ const Dashboard = () => {
                     setLiveData((prev) => {
                         const newLifetimeKwh = Number(data.kwh_consumption) || prev.kwhConsumption;
                         const liveTodayUsage = Math.max(0, newLifetimeKwh - startOfDayOffset.current);
+                        const activeAppliances = data.active_appliances || prev.activeAppliances || [];
+                        const counts = deriveActiveCounts(
+                            activeAppliances,
+                            data.active_device_count,
+                            data.active_type_count
+                        );
 
                         return {
                             ...prev,
@@ -179,7 +220,9 @@ const Dashboard = () => {
                             current: Number(data.current) || prev.current,
                             kwhConsumption: newLifetimeKwh,
                             todayKwhUsage: liveTodayUsage,
-                            activeAppliances: data.active_appliances || prev.activeAppliances || []
+                            activeAppliances,
+                            activeDeviceCount: counts.activeDeviceCount,
+                            activeTypeCount: counts.activeTypeCount,
                         };
                     });
 
@@ -261,9 +304,8 @@ const Dashboard = () => {
                 retrainNow: true,
             });
 
-            setLiveData((prev) => ({
-                ...prev,
-                activeAppliances: (prev.activeAppliances || []).map((item) => {
+            setLiveData((prev) => {
+                const updatedAppliances = (prev.activeAppliances || []).map((item) => {
                     const isTarget = item.id
                         ? item.id === app.id
                         : item.name === app.name &&
@@ -280,8 +322,17 @@ const Dashboard = () => {
                         confidence: 1,
                         candidates: [],
                     };
-                }),
-            }));
+                });
+
+                const counts = deriveActiveCounts(updatedAppliances);
+
+                return {
+                    ...prev,
+                    activeAppliances: updatedAppliances,
+                    activeDeviceCount: counts.activeDeviceCount,
+                    activeTypeCount: counts.activeTypeCount,
+                };
+            });
 
             const retrained = Boolean(response?.retrained);
             const reloaded = Boolean(response?.model_reloaded);
@@ -336,6 +387,27 @@ const Dashboard = () => {
             kwhConsumption: liveData.todayKwhUsage.toFixed(2),
             todayKwhUsage: liveData.todayKwhUsage.toFixed(2),
         };
+
+    const allDetectedAppliances = Array.isArray(liveData.activeAppliances)
+        ? liveData.activeAppliances
+        : [];
+
+    const highConfidenceAppliances = allDetectedAppliances.filter(
+        (app) => Number(app?.confidence || 0) >= ACTIVE_CARD_CONFIDENCE_THRESHOLD
+    );
+
+    const possibleAppliances = allDetectedAppliances.filter((app) => {
+        const confidence = Number(app?.confidence || 0);
+        return (
+            confidence >= POSSIBLE_CARD_CONFIDENCE_THRESHOLD
+            && confidence < ACTIVE_CARD_CONFIDENCE_THRESHOLD
+        );
+    });
+
+    const hiddenLowConfidenceCount = Math.max(
+        0,
+        allDetectedAppliances.length - highConfidenceAppliances.length - possibleAppliances.length
+    );
 
     return (
         <div className="p-4 md:p-6 flex flex-col mb-8">
@@ -454,10 +526,16 @@ const Dashboard = () => {
                                     <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                                         <Activity className="w-4 h-4" /> Itemized Billing
                                     </p>
-                                    <span className="relative flex h-2.5 w-2.5">
-                                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${liveData.power > 2 ? "bg-green-400" : "bg-gray-400"}`}></span>
-                                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${liveData.power > 2 ? "bg-green-500" : "bg-gray-500"}`}></span>
-                                    </span>
+                                    <div className="flex items-center gap-3">
+                                        <p className="text-[10px] text-muted-foreground font-semibold">
+                                            {highConfidenceAppliances.length} active • {possibleAppliances.length} possible
+                                            {hiddenLowConfidenceCount > 0 ? ` • ${hiddenLowConfidenceCount} hidden` : ""}
+                                        </p>
+                                        <span className="relative flex h-2.5 w-2.5">
+                                            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${liveData.power > 2 ? "bg-green-400" : "bg-gray-400"}`}></span>
+                                            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${liveData.power > 2 ? "bg-green-500" : "bg-gray-500"}`}></span>
+                                        </span>
+                                    </div>
                                 </div>
 
                                 {/* Scrolling Box */}
@@ -500,81 +578,148 @@ const Dashboard = () => {
                                         </div>
                                     )}
 
-                                    {liveData.power < 2 || !liveData.activeAppliances || liveData.activeAppliances.length === 0 ? (
+                                    {liveData.power < 2 || allDetectedAppliances.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-xl border border-border/50">
                                             <Plug className="w-8 h-8 text-muted-foreground mb-2 opacity-50" />
                                             <p className="text-sm font-bold text-text/60">No Devices Detected</p>
                                             <p className="text-xs text-muted-foreground mt-1">Plug in an appliance to see live stats.</p>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            {liveData.activeAppliances.map((app, idx) => {
-                                                const costPerHour = ((app.power / 1000) * paymentRate).toFixed(2);
-                                                const confidenceMeta = getConfidenceMeta(app.confidence);
-                                                const feedbackId = app.id || `${app.name}-${idx}`;
-                                                const candidateLabels = Array.isArray(app.candidates)
-                                                    ? app.candidates
-                                                        .filter((candidate) => candidate?.label && candidate.label !== app.name)
-                                                        .slice(0, 2)
-                                                        .map((candidate) => `${candidate.label} ${(Number(candidate.confidence || 0) * 100).toFixed(0)}%`)
-                                                    : [];
+                                        <>
+                                            {highConfidenceAppliances.length > 0 ? (
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    {highConfidenceAppliances.map((app, idx) => {
+                                                        const costPerHour = ((app.power / 1000) * paymentRate).toFixed(2);
+                                                        const confidenceMeta = getConfidenceMeta(app.confidence);
+                                                        const feedbackId = app.id || `${app.name}-${idx}`;
+                                                        const candidateLabels = Array.isArray(app.candidates)
+                                                            ? app.candidates
+                                                                .filter((candidate) => candidate?.label && candidate.label !== app.name)
+                                                                .slice(0, 2)
+                                                                .map((candidate) => `${candidate.label} ${(Number(candidate.confidence || 0) * 100).toFixed(0)}%`)
+                                                            : [];
 
-                                                return (
-                                                    <div key={feedbackId} className="flex flex-col p-4 bg-white rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-shadow">
-                                                        <div className="flex justify-between items-start mb-3">
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="p-1.5 bg-muted/50 rounded-lg">
-                                                                    {getApplianceIcon(app.name)}
+                                                        return (
+                                                            <div key={feedbackId} className="flex flex-col p-4 bg-white rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-shadow">
+                                                                <div className="flex justify-between items-start mb-3">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="p-1.5 bg-muted/50 rounded-lg">
+                                                                            {getApplianceIcon(app.name)}
+                                                                        </div>
+                                                                        <span className="text-sm font-bold text-text/90 capitalize">{app.name}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col items-end gap-1">
+                                                                        <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">ACTIVE</span>
+                                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${confidenceMeta.className}`}>
+                                                                            {confidenceMeta.label}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
-                                                                <span className="text-sm font-bold text-text/90 capitalize">{app.name}</span>
-                                                            </div>
-                                                            <div className="flex flex-col items-end gap-1">
-                                                                <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">ACTIVE</span>
-                                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${confidenceMeta.className}`}>
-                                                                    {confidenceMeta.label}
-                                                                </span>
-                                                            </div>
-                                                        </div>
 
-                                                        <div className="grid grid-cols-2 gap-y-3 gap-x-2 mt-1">
-                                                            <div>
-                                                                <p className="text-[10px] font-medium text-muted-foreground uppercase">Power</p>
-                                                                <p className="text-sm font-bold text-primary">{app.power} <span className="text-[10px] text-text/60 font-normal">W</span></p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-[10px] font-medium text-muted-foreground uppercase">Current</p>
-                                                                <p className="text-sm font-bold">{app.current} <span className="text-[10px] text-text/60 font-normal">A</span></p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-[10px] font-medium text-muted-foreground uppercase">Voltage</p>
-                                                                <p className="text-sm font-bold">{app.voltage} <span className="text-[10px] text-text/60 font-normal">V</span></p>
-                                                            </div>
-                                                            <div className="bg-primary/5 p-1.5 -m-1.5 rounded-md border border-primary/10">
-                                                                <p className="text-[10px] font-bold text-primary uppercase">Est. Cost</p>
-                                                                <p className="text-sm font-bold text-primary">₱{costPerHour} <span className="text-[10px] text-primary/70 font-normal">/hr</span></p>
-                                                            </div>
-                                                        </div>
+                                                                <div className="grid grid-cols-2 gap-y-3 gap-x-2 mt-1">
+                                                                    <div>
+                                                                        <p className="text-[10px] font-medium text-muted-foreground uppercase">Power</p>
+                                                                        <p className="text-sm font-bold text-primary">{app.power} <span className="text-[10px] text-text/60 font-normal">W</span></p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-[10px] font-medium text-muted-foreground uppercase">Current</p>
+                                                                        <p className="text-sm font-bold">{app.current} <span className="text-[10px] text-text/60 font-normal">A</span></p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-[10px] font-medium text-muted-foreground uppercase">Voltage</p>
+                                                                        <p className="text-sm font-bold">{app.voltage} <span className="text-[10px] text-text/60 font-normal">V</span></p>
+                                                                    </div>
+                                                                    <div className="bg-primary/5 p-1.5 -m-1.5 rounded-md border border-primary/10">
+                                                                        <p className="text-[10px] font-bold text-primary uppercase">Est. Cost</p>
+                                                                        <p className="text-sm font-bold text-primary">₱{costPerHour} <span className="text-[10px] text-primary/70 font-normal">/hr</span></p>
+                                                                    </div>
+                                                                </div>
 
-                                                        {candidateLabels.length > 0 && (
-                                                            <p className="mt-3 text-[11px] text-muted-foreground leading-snug">
-                                                                Possible: {candidateLabels.join(", ")}
-                                                            </p>
-                                                        )}
+                                                                {candidateLabels.length > 0 && (
+                                                                    <p className="mt-3 text-[11px] text-muted-foreground leading-snug">
+                                                                        Possible: {candidateLabels.join(", ")}
+                                                                    </p>
+                                                                )}
 
-                                                        <button
-                                                            type="button"
-                                                            disabled={feedbackBusyId === feedbackId}
-                                                            onClick={() => handleNilpFeedback(app)}
-                                                            className="mt-3 text-[11px] font-semibold text-primary hover:text-primary/80 disabled:opacity-60 disabled:cursor-not-allowed text-left"
-                                                        >
-                                                            {feedbackBusyId === feedbackId
-                                                                ? "Saving correction..."
-                                                                : "Correct label"}
-                                                        </button>
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={feedbackBusyId === feedbackId}
+                                                                    onClick={() => handleNilpFeedback(app)}
+                                                                    className="mt-3 text-[11px] font-semibold text-primary hover:text-primary/80 disabled:opacity-60 disabled:cursor-not-allowed text-left"
+                                                                >
+                                                                    {feedbackBusyId === feedbackId
+                                                                        ? "Saving correction..."
+                                                                        : "Correct label"}
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center p-4 bg-muted/20 rounded-xl border border-border/50">
+                                                    <p className="text-sm font-bold text-text/60">No High-Confidence Devices Yet</p>
+                                                    <p className="text-xs text-muted-foreground mt-1">Check Possible Devices below while the model stabilizes.</p>
+                                                </div>
+                                            )}
+
+                                            {possibleAppliances.length > 0 && (
+                                                <div className="mt-3 rounded-xl border border-amber-200/70 bg-amber-50/50 p-3">
+                                                    <p className="text-[11px] font-bold uppercase tracking-wide text-amber-700 mb-2">
+                                                        Possible Devices (Lower Confidence)
+                                                    </p>
+                                                    <div className="space-y-2">
+                                                        {possibleAppliances.map((app, idx) => {
+                                                            const confidenceMeta = getConfidenceMeta(app.confidence);
+                                                            const feedbackId = app.id || `${app.name}-${idx}-possible`;
+                                                            const candidateLabels = Array.isArray(app.candidates)
+                                                                ? app.candidates
+                                                                    .filter((candidate) => candidate?.label && candidate.label !== app.name)
+                                                                    .slice(0, 2)
+                                                                    .map((candidate) => `${candidate.label} ${(Number(candidate.confidence || 0) * 100).toFixed(0)}%`)
+                                                                : [];
+
+                                                            return (
+                                                                <div key={feedbackId} className="rounded-lg border border-amber-200/60 bg-white p-2.5">
+                                                                    <div className="flex items-center justify-between gap-2">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="p-1 bg-muted/40 rounded-md">
+                                                                                {getApplianceIcon(app.name)}
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className="text-xs font-semibold text-text/85 capitalize">{app.name}</p>
+                                                                                <p className="text-[10px] text-muted-foreground">
+                                                                                    {app.power}W • {app.current}A • {app.voltage}V
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${confidenceMeta.className}`}>
+                                                                            {confidenceMeta.label}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {candidateLabels.length > 0 && (
+                                                                        <p className="mt-1.5 text-[10px] text-muted-foreground leading-snug">
+                                                                            Possible: {candidateLabels.join(", ")}
+                                                                        </p>
+                                                                    )}
+
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={feedbackBusyId === feedbackId}
+                                                                        onClick={() => handleNilpFeedback(app)}
+                                                                        className="mt-2 text-[10px] font-semibold text-primary hover:text-primary/80 disabled:opacity-60 disabled:cursor-not-allowed text-left"
+                                                                    >
+                                                                        {feedbackBusyId === feedbackId
+                                                                            ? "Saving correction..."
+                                                                            : "Correct label"}
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>

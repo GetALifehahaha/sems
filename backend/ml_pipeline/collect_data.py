@@ -12,10 +12,19 @@ from urllib.parse import urlparse, urlunparse
 DEFAULT_WS_PATH = "/ws/electrical/"
 DEFAULT_WS_URL = f"ws://127.0.0.1:8000{DEFAULT_WS_PATH}"
 DEFAULT_RETRY_DELAY_SECONDS = 3
+CSV_HEADER = [
+    "Power_Jump_Watts",
+    "Current_Jump_Amps",
+    "Appliance_Name",
+    "Event_Type",
+    "Source",
+    "Rated_Watts_Ref",
+]
 
 WS_URL = os.getenv("WS_URL", DEFAULT_WS_URL)
 CSV_FILENAME = os.getenv("NILP_DATASET_CSV", "my_appliances_dataset.csv")
 SPIKE_THRESHOLD_WATTS = float(os.getenv("SPIKE_THRESHOLD_WATTS", "3"))
+ROW_SOURCE = os.getenv("NILP_SOURCE", "collector_manual")
 
 previous_power = 0.0
 previous_current = 0.0
@@ -71,6 +80,11 @@ def parse_args():
         action="store_true",
         help="Disable ngrok skip-browser-warning header.",
     )
+    parser.add_argument(
+        "--source",
+        default=ROW_SOURCE,
+        help="Source tag to store in dataset rows.",
+    )
     return parser.parse_args()
 
 def setup_csv():
@@ -78,8 +92,36 @@ def setup_csv():
     with open(CSV_FILENAME, mode='a', newline='') as file:
         writer = csv.writer(file)
         if not file_exists or os.stat(CSV_FILENAME).st_size == 0:
-            writer.writerow(["Power_Jump_Watts", "Current_Jump_Amps", "Appliance_Name"])
+            writer.writerow(CSV_HEADER)
     print(f"📄 Dataset file ready: {CSV_FILENAME}")
+
+
+def read_dataset_columns(file_path):
+    if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+        return list(CSV_HEADER)
+
+    with open(file_path, mode="r", newline="", encoding="utf-8") as file:
+        reader = csv.reader(file)
+        first_row = next(reader, [])
+
+    return [str(column).strip() for column in first_row if str(column).strip()]
+
+
+def build_dataset_row(columns, power_jump, current_jump, appliance_name):
+    normalized = [column.lower() for column in columns]
+    if "event_type" not in normalized or "source" not in normalized:
+        return [power_jump, current_jump, appliance_name]
+
+    row_by_column = {
+        "power_jump_watts": power_jump,
+        "current_jump_amps": current_jump,
+        "appliance_name": appliance_name,
+        "event_type": "ON",
+        "source": ROW_SOURCE,
+        "rated_watts_ref": "",
+    }
+
+    return [row_by_column.get(column.lower(), "") for column in columns]
 
 def on_message(ws, message):
     global previous_power, previous_current
@@ -111,9 +153,10 @@ def on_message(ws, message):
             appliance_name = appliance_name.strip()
 
             if appliance_name and appliance_name.lower() != 'skip':
+                dataset_columns = read_dataset_columns(CSV_FILENAME)
                 with open(CSV_FILENAME, mode='a', newline='') as file:
                     writer = csv.writer(file)
-                    writer.writerow([power_jump, current_jump, appliance_name])
+                    writer.writerow(build_dataset_row(dataset_columns, power_jump, current_jump, appliance_name))
                 print(f"✅ Saved to CSV!")
     except Exception as e:
         print(f"❌ Error parsing JSON: {e}")
@@ -164,10 +207,12 @@ if __name__ == "__main__":
 
     CSV_FILENAME = args.csv
     SPIKE_THRESHOLD_WATTS = args.spike_threshold
+    ROW_SOURCE = str(args.source).strip() or "collector_manual"
 
     print(f"🔌 WebSocket URL: {WS_URL}")
     print(f"📁 CSV output: {CSV_FILENAME}")
     print(f"📏 Spike threshold: {SPIKE_THRESHOLD_WATTS:.2f}W")
+    print(f"🏷️ Row source: {ROW_SOURCE}")
 
     setup_csv()
     run_collector(

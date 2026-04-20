@@ -1,0 +1,748 @@
+Power_Jump_Watts,Current_Jump_Amps,Appliance_Name,Event_Type,Source,Rated_Watts_Ref
+33.4,0.154,Fan,ON,user_existing,
+44.4,0.174,Fan,ON,user_existing,
+47.9,0.214,Fan,ON,user_existing,
+25.3,0.093,Fan,ON,user_existing,
+56.6,0.25,Fan,ON,user_existing,
+15.3,0.052,Fan,ON,user_existing,
+47.7,0.213,Fan,ON,user_existing,
+36.0,0.165,Fan,ON,user_existing,
+37.6,0.144,Fan,ON,user_existing,
+30.3,0.141,Fan,ON,user_existing,
+45.1,0.176,Fan,ON,user_existing,
+36.8,0.168,Fan,ON,user_existing,
+37.5,0.144,Fan,ON,user_existing,
+8.5,0.057,Phone Charger,ON,user_existing,
+6.3,0.056,Phone Charger,ON,user_existing,
+4.7,0.03,Phone Charger,ON,user_existing,
+8.0,0.055,Phone Charger,ON,user_existing,
+6.2,0.058,Phone Charger,ON,user_existing,
+4.4,0.028,Phone Charger,ON,user_existing,
+8.7,0.06,Phone Charger,ON,user_existing,
+7.1,0.066,Phone Charger,ON,user_existing,
+3.3,0.021,Phone Charger,ON,user_existing,
+7.4,0.071,Phone Charger,ON,user_existing,
+6.0,0.033,Phone Charger,ON,user_existing,
+4.7,0.031,Phone Charger,ON,user_existing,
+37.5,0.277,Laptop Charger,ON,user_existing,
+13.9,0.089,Laptop Charger,ON,user_existing,
+41.2791,0.140866,Fan,ON,synthetic_catalog,60
+49.162,0.233452,Fan,ON,synthetic_catalog,60
+32.0688,0.123361,Fan,ON,synthetic_catalog,60
+15.6089,0.157856,Fan,ON,synthetic_catalog,60
+25.1868,0.180856,Fan,ON,synthetic_catalog,60
+52.4807,0.16655,Fan,ON,synthetic_catalog,60
+56.9358,0.1388,Fan,ON,synthetic_catalog,60
+53.7987,0.254824,Fan,ON,synthetic_catalog,60
+41.3518,0.163778,Fan,ON,synthetic_catalog,60
+53.0674,0.2555,Fan,ON,synthetic_catalog,60
+44.1602,0.140711,Fan,ON,synthetic_catalog,60
+17.9945,0.078932,Fan,ON,synthetic_catalog,60
+42.8985,0.156294,Fan,ON,synthetic_catalog,60
+28.4295,0.181881,Fan,ON,synthetic_catalog,60
+23.3254,0.098165,Fan,ON,synthetic_catalog,60
+60.0,0.227063,Fan,ON,synthetic_catalog,60
+54.6813,0.151797,Fan,ON,synthetic_catalog,60
+28.3817,0.123943,Fan,ON,synthetic_catalog,60
+-53.5627,-0.20463,Fan,OFF,synthetic_catalog,60
+-24.8883,-0.156642,Fan,OFF,synthetic_catalog,60
+-27.8652,-0.204233,Fan,OFF,synthetic_catalog,60
+-17.6113,-0.168508,Fan,OFF,synthetic_catalog,60
+-51.7102,-0.289041,Fan,OFF,synthetic_catalog,60
+-40.2753,-0.146584,Fan,OFF,synthetic_catalog,60
+-35.1091,-0.194135,Fan,OFF,synthetic_catalog,60
+-56.0685,-0.163484,Fan,OFF,synthetic_catalog,60
+-42.6141,-0.214678,Fan,OFF,synthetic_catalog,60
+-15.1782,-0.175362,Fan,OFF,synthetic_catalog,60
+-50.0293,-0.14518,Fan,OFF,synthetic_catalog,60
+-42.645,-0.188036,Fan,OFF,synthetic_catalog,60
+-29.3207,-0.161136,Fan,OFF,synthetic_catalog,60
+-52.7616,-0.18278,Fan,OFF,synthetic_catalog,60
+-26.6061,-0.11221,Fan,OFF,synthetic_catalog,60
+-23.8291,-0.18547,Fan,OFF,synthetic_catalog,60
+-22.0372,-0.210987,Fan,OFF,synthetic_catalog,60
+-45.8599,-0.125649,Fan,OFF,synthetic_catalog,60
+53.907,0.265257,Laptop Charger,ON,synthetic_catalog,60
+37.3829,0.22756,Laptop Charger,ON,synthetic_catalog,60
+28.3833,0.152511,Laptop Charger,ON,synthetic_catalog,60
+32.8281,0.178668,Laptop Charger,ON,synthetic_catalog,60
+42.3505,0.279827,Laptop Charger,ON,synthetic_catalog,60
+65.0,0.268133,Laptop Charger,ON,synthetic_catalog,60
+40.4162,0.163607,Laptop Charger,ON,synthetic_catalog,60
+39.2117,0.1614,Laptop Charger,ON,synthetic_catalog,60
+40.1014,0.275856,Laptop Charger,ON,synthetic_catalog,60
+46.1892,0.145721,Laptop Charger,ON,synthetic_catalog,60
+64.1961,0.247153,Laptop Charger,ON,synthetic_catalog,60
+22.8004,0.169097,Laptop Charger,ON,synthetic_catalog,60
+28.5821,0.103753,Laptop Charger,ON,synthetic_catalog,60
+47.7601,0.1549,Laptop Charger,ON,synthetic_catalog,60
+58.2338,0.239373,Laptop Charger,ON,synthetic_catalog,60
+39.2554,0.204874,Laptop Charger,ON,synthetic_catalog,60
+29.949,0.132214,Laptop Charger,ON,synthetic_catalog,60
+49.0206,0.185987,Laptop Charger,ON,synthetic_catalog,60
+-20.1786,-0.223931,Laptop Charger,OFF,synthetic_catalog,60
+-30.8773,-0.21903,Laptop Charger,OFF,synthetic_catalog,60
+-56.8396,-0.221475,Laptop Charger,OFF,synthetic_catalog,60
+-48.837,-0.225527,Laptop Charger,OFF,synthetic_catalog,60
+-24.3462,-0.118574,Laptop Charger,OFF,synthetic_catalog,60
+-46.9479,-0.18665,Laptop Charger,OFF,synthetic_catalog,60
+-36.5673,-0.107864,Laptop Charger,OFF,synthetic_catalog,60
+-46.8165,-0.187275,Laptop Charger,OFF,synthetic_catalog,60
+-53.9131,-0.244665,Laptop Charger,OFF,synthetic_catalog,60
+-35.6292,-0.21207,Laptop Charger,OFF,synthetic_catalog,60
+-27.5104,-0.215933,Laptop Charger,OFF,synthetic_catalog,60
+-28.0541,-0.238944,Laptop Charger,OFF,synthetic_catalog,60
+-21.462,-0.142559,Laptop Charger,OFF,synthetic_catalog,60
+-54.8782,-0.240127,Laptop Charger,OFF,synthetic_catalog,60
+-30.7526,-0.1463,Laptop Charger,OFF,synthetic_catalog,60
+-20.5875,-0.124993,Laptop Charger,OFF,synthetic_catalog,60
+-48.7746,-0.241427,Laptop Charger,OFF,synthetic_catalog,60
+-53.7042,-0.262187,Laptop Charger,OFF,synthetic_catalog,60
+11.48,0.061175,Phone Charger,ON,synthetic_catalog,12
+7.6924,0.038861,Phone Charger,ON,synthetic_catalog,12
+3.1745,0.044889,Phone Charger,ON,synthetic_catalog,12
+12.1471,0.047126,Phone Charger,ON,synthetic_catalog,12
+10.7473,0.048307,Phone Charger,ON,synthetic_catalog,12
+11.3582,0.045916,Phone Charger,ON,synthetic_catalog,12
+7.6368,0.030992,Phone Charger,ON,synthetic_catalog,12
+14.5883,0.082197,Phone Charger,ON,synthetic_catalog,12
+6.6494,0.02278,Phone Charger,ON,synthetic_catalog,12
+8.237,0.057428,Phone Charger,ON,synthetic_catalog,12
+8.0206,0.051785,Phone Charger,ON,synthetic_catalog,12
+12.0548,0.037127,Phone Charger,ON,synthetic_catalog,12
+10.3857,0.072133,Phone Charger,ON,synthetic_catalog,12
+10.7076,0.037123,Phone Charger,ON,synthetic_catalog,12
+5.9204,0.058772,Phone Charger,ON,synthetic_catalog,12
+8.0975,0.036528,Phone Charger,ON,synthetic_catalog,12
+8.6581,0.053916,Phone Charger,ON,synthetic_catalog,12
+12.4008,0.03822,Phone Charger,ON,synthetic_catalog,12
+-4.8517,-0.042728,Phone Charger,OFF,synthetic_catalog,12
+-8.3913,-0.064719,Phone Charger,OFF,synthetic_catalog,12
+-13.7836,-0.067021,Phone Charger,OFF,synthetic_catalog,12
+-12.7459,-0.054967,Phone Charger,OFF,synthetic_catalog,12
+-10.6615,-0.055297,Phone Charger,OFF,synthetic_catalog,12
+-5.4943,-0.044443,Phone Charger,OFF,synthetic_catalog,12
+-10.0777,-0.045392,Phone Charger,OFF,synthetic_catalog,12
+-8.4077,-0.055425,Phone Charger,OFF,synthetic_catalog,12
+-7.0915,-0.043472,Phone Charger,OFF,synthetic_catalog,12
+-7.4011,-0.047853,Phone Charger,OFF,synthetic_catalog,12
+-7.1801,-0.037966,Phone Charger,OFF,synthetic_catalog,12
+-7.5911,-0.049339,Phone Charger,OFF,synthetic_catalog,12
+-2.9359,-0.022322,Phone Charger,OFF,synthetic_catalog,12
+-5.3181,-0.05646,Phone Charger,OFF,synthetic_catalog,12
+-5.8393,-0.021096,Phone Charger,OFF,synthetic_catalog,12
+-11.2996,-0.0582,Phone Charger,OFF,synthetic_catalog,12
+-2.9545,-0.021568,Phone Charger,OFF,synthetic_catalog,12
+-11.5194,-0.036186,Phone Charger,OFF,synthetic_catalog,12
+16.7145,0.048292,WiFi Router,ON,synthetic_catalog,18
+9.9508,0.079954,WiFi Router,ON,synthetic_catalog,18
+13.8383,0.076747,WiFi Router,ON,synthetic_catalog,18
+7.459,0.07294,WiFi Router,ON,synthetic_catalog,18
+7.8854,0.067586,WiFi Router,ON,synthetic_catalog,18
+10.9675,0.059801,WiFi Router,ON,synthetic_catalog,18
+16.8213,0.056178,WiFi Router,ON,synthetic_catalog,18
+14.1645,0.075794,WiFi Router,ON,synthetic_catalog,18
+15.6325,0.061019,WiFi Router,ON,synthetic_catalog,18
+12.4334,0.062768,WiFi Router,ON,synthetic_catalog,18
+9.6099,0.069655,WiFi Router,ON,synthetic_catalog,18
+16.07,0.069459,WiFi Router,ON,synthetic_catalog,18
+9.9513,0.072276,WiFi Router,ON,synthetic_catalog,18
+8.8509,0.052755,WiFi Router,ON,synthetic_catalog,18
+14.0272,0.045957,WiFi Router,ON,synthetic_catalog,18
+7.2129,0.056226,WiFi Router,ON,synthetic_catalog,18
+14.5375,0.069975,WiFi Router,ON,synthetic_catalog,18
+6.8789,0.06121,WiFi Router,ON,synthetic_catalog,18
+-12.6699,-0.05952,WiFi Router,OFF,synthetic_catalog,18
+-12.5048,-0.044988,WiFi Router,OFF,synthetic_catalog,18
+-12.0198,-0.045823,WiFi Router,OFF,synthetic_catalog,18
+-15.8356,-0.052437,WiFi Router,OFF,synthetic_catalog,18
+-7.7999,-0.052106,WiFi Router,OFF,synthetic_catalog,18
+-13.7196,-0.079416,WiFi Router,OFF,synthetic_catalog,18
+-11.6717,-0.040798,WiFi Router,OFF,synthetic_catalog,18
+-13.6161,-0.044044,WiFi Router,OFF,synthetic_catalog,18
+-12.2336,-0.078507,WiFi Router,OFF,synthetic_catalog,18
+-13.943,-0.068424,WiFi Router,OFF,synthetic_catalog,18
+-17.0858,-0.080475,WiFi Router,OFF,synthetic_catalog,18
+-7.2791,-0.052713,WiFi Router,OFF,synthetic_catalog,18
+-5.3822,-0.053556,WiFi Router,OFF,synthetic_catalog,18
+-14.156,-0.07787,WiFi Router,OFF,synthetic_catalog,18
+-14.1261,-0.064701,WiFi Router,OFF,synthetic_catalog,18
+-14.7963,-0.048142,WiFi Router,OFF,synthetic_catalog,18
+-9.1346,-0.064777,WiFi Router,OFF,synthetic_catalog,18
+-10.3237,-0.035263,WiFi Router,OFF,synthetic_catalog,18
+5.1856,0.056804,LED Bulb,ON,synthetic_catalog,12
+14.0,0.062202,LED Bulb,ON,synthetic_catalog,12
+4.5377,0.040614,LED Bulb,ON,synthetic_catalog,12
+12.6577,0.059861,LED Bulb,ON,synthetic_catalog,12
+8.4799,0.040259,LED Bulb,ON,synthetic_catalog,12
+11.1607,0.046664,LED Bulb,ON,synthetic_catalog,12
+7.2498,0.059249,LED Bulb,ON,synthetic_catalog,12
+8.358,0.043131,LED Bulb,ON,synthetic_catalog,12
+8.0558,0.069214,LED Bulb,ON,synthetic_catalog,12
+9.3278,0.035302,LED Bulb,ON,synthetic_catalog,12
+11.7385,0.061283,LED Bulb,ON,synthetic_catalog,12
+9.9793,0.049271,LED Bulb,ON,synthetic_catalog,12
+5.5103,0.045189,LED Bulb,ON,synthetic_catalog,12
+5.6178,0.042038,LED Bulb,ON,synthetic_catalog,12
+14.0,0.052318,LED Bulb,ON,synthetic_catalog,12
+12.319,0.063612,LED Bulb,ON,synthetic_catalog,12
+7.0047,0.062673,LED Bulb,ON,synthetic_catalog,12
+9.3798,0.067119,LED Bulb,ON,synthetic_catalog,12
+-12.3693,-0.049461,LED Bulb,OFF,synthetic_catalog,12
+-8.9921,-0.039748,LED Bulb,OFF,synthetic_catalog,12
+-8.0808,-0.045657,LED Bulb,OFF,synthetic_catalog,12
+-7.9644,-0.03192,LED Bulb,OFF,synthetic_catalog,12
+-10.9986,-0.0596,LED Bulb,OFF,synthetic_catalog,12
+-9.5652,-0.068037,LED Bulb,OFF,synthetic_catalog,12
+-9.7636,-0.061644,LED Bulb,OFF,synthetic_catalog,12
+-10.3828,-0.056396,LED Bulb,OFF,synthetic_catalog,12
+-7.529,-0.055247,LED Bulb,OFF,synthetic_catalog,12
+-7.6253,-0.050001,LED Bulb,OFF,synthetic_catalog,12
+-4.6603,-0.059155,LED Bulb,OFF,synthetic_catalog,12
+-4.9178,-0.057197,LED Bulb,OFF,synthetic_catalog,12
+-4.0794,-0.029961,LED Bulb,OFF,synthetic_catalog,12
+-9.9917,-0.032676,LED Bulb,OFF,synthetic_catalog,12
+-6.0575,-0.026596,LED Bulb,OFF,synthetic_catalog,12
+-3.7568,-0.054777,LED Bulb,OFF,synthetic_catalog,12
+-6.7807,-0.051065,LED Bulb,OFF,synthetic_catalog,12
+-5.6227,-0.038823,LED Bulb,OFF,synthetic_catalog,12
+23.3033,0.114291,CFL Bulb,ON,synthetic_catalog,20
+13.221,0.08304,CFL Bulb,ON,synthetic_catalog,20
+9.86,0.069193,CFL Bulb,ON,synthetic_catalog,20
+13.7696,0.075265,CFL Bulb,ON,synthetic_catalog,20
+18.8184,0.092415,CFL Bulb,ON,synthetic_catalog,20
+19.6546,0.09404,CFL Bulb,ON,synthetic_catalog,20
+18.2665,0.077907,CFL Bulb,ON,synthetic_catalog,20
+19.0024,0.074033,CFL Bulb,ON,synthetic_catalog,20
+11.121,0.074455,CFL Bulb,ON,synthetic_catalog,20
+17.8045,0.09114,CFL Bulb,ON,synthetic_catalog,20
+21.3238,0.103733,CFL Bulb,ON,synthetic_catalog,20
+13.4305,0.088198,CFL Bulb,ON,synthetic_catalog,20
+24.0,0.108219,CFL Bulb,ON,synthetic_catalog,20
+24.0,0.08717,CFL Bulb,ON,synthetic_catalog,20
+9.2492,0.063627,CFL Bulb,ON,synthetic_catalog,20
+19.2788,0.103838,CFL Bulb,ON,synthetic_catalog,20
+10.2858,0.045739,CFL Bulb,ON,synthetic_catalog,20
+18.2892,0.06179,CFL Bulb,ON,synthetic_catalog,20
+-19.7712,-0.077208,CFL Bulb,OFF,synthetic_catalog,20
+-11.9502,-0.051733,CFL Bulb,OFF,synthetic_catalog,20
+-19.1968,-0.090399,CFL Bulb,OFF,synthetic_catalog,20
+-14.6682,-0.061969,CFL Bulb,OFF,synthetic_catalog,20
+-12.6646,-0.097129,CFL Bulb,OFF,synthetic_catalog,20
+-16.1614,-0.062973,CFL Bulb,OFF,synthetic_catalog,20
+-20.6421,-0.082456,CFL Bulb,OFF,synthetic_catalog,20
+-17.5605,-0.064625,CFL Bulb,OFF,synthetic_catalog,20
+-10.3335,-0.084065,CFL Bulb,OFF,synthetic_catalog,20
+-8.4893,-0.039552,CFL Bulb,OFF,synthetic_catalog,20
+-16.021,-0.05318,CFL Bulb,OFF,synthetic_catalog,20
+-10.7625,-0.074001,CFL Bulb,OFF,synthetic_catalog,20
+-20.9363,-0.056594,CFL Bulb,OFF,synthetic_catalog,20
+-21.9707,-0.074902,CFL Bulb,OFF,synthetic_catalog,20
+-16.0825,-0.073765,CFL Bulb,OFF,synthetic_catalog,20
+-9.9442,-0.041244,CFL Bulb,OFF,synthetic_catalog,20
+-14.0674,-0.065234,CFL Bulb,OFF,synthetic_catalog,20
+-19.8513,-0.084559,CFL Bulb,OFF,synthetic_catalog,20
+85.0339,0.370852,Smart TV,ON,synthetic_catalog,120
+80.4123,0.40338,Smart TV,ON,synthetic_catalog,120
+77.2006,0.504679,Smart TV,ON,synthetic_catalog,120
+117.9647,0.368859,Smart TV,ON,synthetic_catalog,120
+122.9441,0.521885,Smart TV,ON,synthetic_catalog,120
+72.8568,0.366475,Smart TV,ON,synthetic_catalog,120
+121.4131,0.597802,Smart TV,ON,synthetic_catalog,120
+100.2224,0.452796,Smart TV,ON,synthetic_catalog,120
+103.8363,0.352825,Smart TV,ON,synthetic_catalog,120
+82.4367,0.464238,Smart TV,ON,synthetic_catalog,120
+132.4244,0.616658,Smart TV,ON,synthetic_catalog,120
+100.0272,0.614611,Smart TV,ON,synthetic_catalog,120
+67.7074,0.443027,Smart TV,ON,synthetic_catalog,120
+72.703,0.523332,Smart TV,ON,synthetic_catalog,120
+79.5044,0.421589,Smart TV,ON,synthetic_catalog,120
+111.9193,0.434286,Smart TV,ON,synthetic_catalog,120
+82.2865,0.510946,Smart TV,ON,synthetic_catalog,120
+50.2217,0.261289,Smart TV,ON,synthetic_catalog,120
+-98.6993,-0.460691,Smart TV,OFF,synthetic_catalog,120
+-107.8107,-0.405334,Smart TV,OFF,synthetic_catalog,120
+-88.2464,-0.388923,Smart TV,OFF,synthetic_catalog,120
+-53.5988,-0.293355,Smart TV,OFF,synthetic_catalog,120
+-60.399,-0.440409,Smart TV,OFF,synthetic_catalog,120
+-54.4975,-0.209348,Smart TV,OFF,synthetic_catalog,120
+-88.3481,-0.439852,Smart TV,OFF,synthetic_catalog,120
+-79.1587,-0.413821,Smart TV,OFF,synthetic_catalog,120
+-112.0626,-0.470084,Smart TV,OFF,synthetic_catalog,120
+-66.4886,-0.286838,Smart TV,OFF,synthetic_catalog,120
+-127.459,-0.538578,Smart TV,OFF,synthetic_catalog,120
+-54.7783,-0.376315,Smart TV,OFF,synthetic_catalog,120
+-110.2693,-0.589122,Smart TV,OFF,synthetic_catalog,120
+-96.2544,-0.457698,Smart TV,OFF,synthetic_catalog,120
+-44.4314,-0.275259,Smart TV,OFF,synthetic_catalog,120
+-64.5999,-0.280211,Smart TV,OFF,synthetic_catalog,120
+-121.4279,-0.491192,Smart TV,OFF,synthetic_catalog,120
+-117.8712,-0.572978,Smart TV,OFF,synthetic_catalog,120
+110.0971,0.509695,Desktop PC,ON,synthetic_catalog,300
+166.6023,0.832148,Desktop PC,ON,synthetic_catalog,300
+138.4169,0.783131,Desktop PC,ON,synthetic_catalog,300
+116.2972,0.615311,Desktop PC,ON,synthetic_catalog,300
+163.1017,1.111161,Desktop PC,ON,synthetic_catalog,300
+91.1564,0.847018,Desktop PC,ON,synthetic_catalog,300
+258.4624,1.419244,Desktop PC,ON,synthetic_catalog,300
+161.5956,0.582759,Desktop PC,ON,synthetic_catalog,300
+319.6841,1.076059,Desktop PC,ON,synthetic_catalog,300
+298.1485,1.058209,Desktop PC,ON,synthetic_catalog,300
+280.7815,1.370466,Desktop PC,ON,synthetic_catalog,300
+245.2738,1.107343,Desktop PC,ON,synthetic_catalog,300
+164.0879,0.601732,Desktop PC,ON,synthetic_catalog,300
+306.9339,0.86072,Desktop PC,ON,synthetic_catalog,300
+102.5916,0.484397,Desktop PC,ON,synthetic_catalog,300
+293.3402,0.728919,Desktop PC,ON,synthetic_catalog,300
+252.2293,0.880877,Desktop PC,ON,synthetic_catalog,300
+288.6162,1.248154,Desktop PC,ON,synthetic_catalog,300
+-170.4441,-0.898479,Desktop PC,OFF,synthetic_catalog,300
+-255.3169,-0.960299,Desktop PC,OFF,synthetic_catalog,300
+-257.729,-1.365636,Desktop PC,OFF,synthetic_catalog,300
+-170.1831,-1.143949,Desktop PC,OFF,synthetic_catalog,300
+-124.7774,-1.117677,Desktop PC,OFF,synthetic_catalog,300
+-278.2905,-1.076227,Desktop PC,OFF,synthetic_catalog,300
+-178.5186,-0.61354,Desktop PC,OFF,synthetic_catalog,300
+-85.3784,-0.511453,Desktop PC,OFF,synthetic_catalog,300
+-278.4938,-1.18194,Desktop PC,OFF,synthetic_catalog,300
+-266.2184,-0.721085,Desktop PC,OFF,synthetic_catalog,300
+-93.8418,-0.955033,Desktop PC,OFF,synthetic_catalog,300
+-96.4,-0.564638,Desktop PC,OFF,synthetic_catalog,300
+-156.0053,-1.151691,Desktop PC,OFF,synthetic_catalog,300
+-118.7445,-0.718864,Desktop PC,OFF,synthetic_catalog,300
+-214.8384,-1.171058,Desktop PC,OFF,synthetic_catalog,300
+-307.0354,-1.070886,Desktop PC,OFF,synthetic_catalog,300
+-129.6819,-0.966802,Desktop PC,OFF,synthetic_catalog,300
+-258.2924,-0.856975,Desktop PC,OFF,synthetic_catalog,300
+1093.0061,5.585291,Electric Kettle,ON,synthetic_catalog,1500
+1523.4567,5.430763,Electric Kettle,ON,synthetic_catalog,1500
+1279.3934,4.502718,Electric Kettle,ON,synthetic_catalog,1500
+986.4808,5.771427,Electric Kettle,ON,synthetic_catalog,1500
+1347.618,6.22778,Electric Kettle,ON,synthetic_catalog,1500
+1262.435,6.493992,Electric Kettle,ON,synthetic_catalog,1500
+995.9993,6.510908,Electric Kettle,ON,synthetic_catalog,1500
+1681.9789,7.657463,Electric Kettle,ON,synthetic_catalog,1500
+1416.3959,6.40394,Electric Kettle,ON,synthetic_catalog,1500
+1475.8326,6.743278,Electric Kettle,ON,synthetic_catalog,1500
+1361.0851,5.086957,Electric Kettle,ON,synthetic_catalog,1500
+1190.3263,5.659586,Electric Kettle,ON,synthetic_catalog,1500
+1149.5912,6.334338,Electric Kettle,ON,synthetic_catalog,1500
+1749.6845,8.0,Electric Kettle,ON,synthetic_catalog,1500
+983.5029,5.222415,Electric Kettle,ON,synthetic_catalog,1500
+1593.5948,5.609048,Electric Kettle,ON,synthetic_catalog,1500
+1513.6846,5.425306,Electric Kettle,ON,synthetic_catalog,1500
+1212.4092,5.968629,Electric Kettle,ON,synthetic_catalog,1500
+-1515.828,-5.968385,Electric Kettle,OFF,synthetic_catalog,1500
+-1252.2606,-4.608365,Electric Kettle,OFF,synthetic_catalog,1500
+-1171.2652,-5.112631,Electric Kettle,OFF,synthetic_catalog,1500
+-1210.5341,-4.986086,Electric Kettle,OFF,synthetic_catalog,1500
+-1689.5491,-5.216151,Electric Kettle,OFF,synthetic_catalog,1500
+-1145.0249,-5.898869,Electric Kettle,OFF,synthetic_catalog,1500
+-1550.6377,-6.585659,Electric Kettle,OFF,synthetic_catalog,1500
+-974.815,-4.295425,Electric Kettle,OFF,synthetic_catalog,1500
+-1443.4555,-4.790815,Electric Kettle,OFF,synthetic_catalog,1500
+-1439.5631,-6.137324,Electric Kettle,OFF,synthetic_catalog,1500
+-1312.9733,-5.659453,Electric Kettle,OFF,synthetic_catalog,1500
+-975.9855,-5.055835,Electric Kettle,OFF,synthetic_catalog,1500
+-911.6612,-5.124285,Electric Kettle,OFF,synthetic_catalog,1500
+-1684.1046,-5.475669,Electric Kettle,OFF,synthetic_catalog,1500
+-1189.7988,-4.736378,Electric Kettle,OFF,synthetic_catalog,1500
+-1456.0393,-6.819795,Electric Kettle,OFF,synthetic_catalog,1500
+-867.7627,-5.475997,Electric Kettle,OFF,synthetic_catalog,1500
+-1174.8008,-6.046529,Electric Kettle,OFF,synthetic_catalog,1500
+638.1283,2.938835,Rice Cooker,ON,synthetic_catalog,700
+369.532,2.196524,Rice Cooker,ON,synthetic_catalog,700
+468.1286,2.259281,Rice Cooker,ON,synthetic_catalog,700
+786.4448,3.510386,Rice Cooker,ON,synthetic_catalog,700
+557.8942,2.336324,Rice Cooker,ON,synthetic_catalog,700
+482.072,1.820378,Rice Cooker,ON,synthetic_catalog,700
+569.0535,2.39428,Rice Cooker,ON,synthetic_catalog,700
+428.7683,2.436934,Rice Cooker,ON,synthetic_catalog,700
+769.5566,3.009849,Rice Cooker,ON,synthetic_catalog,700
+489.9608,3.172716,Rice Cooker,ON,synthetic_catalog,700
+851.5396,2.700992,Rice Cooker,ON,synthetic_catalog,700
+650.7384,2.998929,Rice Cooker,ON,synthetic_catalog,700
+672.0585,2.881339,Rice Cooker,ON,synthetic_catalog,700
+773.8806,2.750329,Rice Cooker,ON,synthetic_catalog,700
+639.3377,2.647821,Rice Cooker,ON,synthetic_catalog,700
+647.2451,2.636575,Rice Cooker,ON,synthetic_catalog,700
+691.0915,3.504013,Rice Cooker,ON,synthetic_catalog,700
+771.993,3.799961,Rice Cooker,ON,synthetic_catalog,700
+-405.6725,-2.074843,Rice Cooker,OFF,synthetic_catalog,700
+-554.2443,-2.752463,Rice Cooker,OFF,synthetic_catalog,700
+-425.1491,-2.707189,Rice Cooker,OFF,synthetic_catalog,700
+-605.4767,-2.53726,Rice Cooker,OFF,synthetic_catalog,700
+-871.0146,-3.274244,Rice Cooker,OFF,synthetic_catalog,700
+-614.5706,-3.255781,Rice Cooker,OFF,synthetic_catalog,700
+-640.9215,-2.669523,Rice Cooker,OFF,synthetic_catalog,700
+-590.0365,-2.996486,Rice Cooker,OFF,synthetic_catalog,700
+-446.4201,-2.38609,Rice Cooker,OFF,synthetic_catalog,700
+-652.148,-2.164368,Rice Cooker,OFF,synthetic_catalog,700
+-571.4864,-2.194894,Rice Cooker,OFF,synthetic_catalog,700
+-761.4259,-2.982497,Rice Cooker,OFF,synthetic_catalog,700
+-443.7984,-2.035099,Rice Cooker,OFF,synthetic_catalog,700
+-479.8817,-2.121725,Rice Cooker,OFF,synthetic_catalog,700
+-485.7334,-2.668461,Rice Cooker,OFF,synthetic_catalog,700
+-876.8363,-2.5653,Rice Cooker,OFF,synthetic_catalog,700
+-544.9636,-2.518559,Rice Cooker,OFF,synthetic_catalog,700
+-630.0481,-2.983639,Rice Cooker,OFF,synthetic_catalog,700
+1197.4361,3.952872,Microwave Oven,ON,synthetic_catalog,1300
+1281.1204,5.412517,Microwave Oven,ON,synthetic_catalog,1300
+1256.8665,5.307844,Microwave Oven,ON,synthetic_catalog,1300
+1486.5259,5.22499,Microwave Oven,ON,synthetic_catalog,1300
+1006.367,5.352919,Microwave Oven,ON,synthetic_catalog,1300
+1221.8525,6.055922,Microwave Oven,ON,synthetic_catalog,1300
+1462.5642,6.125822,Microwave Oven,ON,synthetic_catalog,1300
+1600.0,5.531307,Microwave Oven,ON,synthetic_catalog,1300
+1600.0,7.0,Microwave Oven,ON,synthetic_catalog,1300
+714.1173,3.554444,Microwave Oven,ON,synthetic_catalog,1300
+1012.2212,4.859568,Microwave Oven,ON,synthetic_catalog,1300
+1600.0,5.425415,Microwave Oven,ON,synthetic_catalog,1300
+768.9256,4.074037,Microwave Oven,ON,synthetic_catalog,1300
+892.2133,5.306449,Microwave Oven,ON,synthetic_catalog,1300
+1327.7559,6.555465,Microwave Oven,ON,synthetic_catalog,1300
+1446.9392,4.647117,Microwave Oven,ON,synthetic_catalog,1300
+828.9424,3.856296,Microwave Oven,ON,synthetic_catalog,1300
+905.0415,5.559523,Microwave Oven,ON,synthetic_catalog,1300
+-968.6504,-3.1755,Microwave Oven,OFF,synthetic_catalog,1300
+-790.2429,-4.030907,Microwave Oven,OFF,synthetic_catalog,1300
+-895.9461,-4.869274,Microwave Oven,OFF,synthetic_catalog,1300
+-728.3277,-4.782607,Microwave Oven,OFF,synthetic_catalog,1300
+-1015.4663,-5.017179,Microwave Oven,OFF,synthetic_catalog,1300
+-1231.3277,-5.226694,Microwave Oven,OFF,synthetic_catalog,1300
+-671.7359,-4.001455,Microwave Oven,OFF,synthetic_catalog,1300
+-974.6915,-4.037391,Microwave Oven,OFF,synthetic_catalog,1300
+-1234.1822,-5.102395,Microwave Oven,OFF,synthetic_catalog,1300
+-1434.1657,-5.301144,Microwave Oven,OFF,synthetic_catalog,1300
+-733.8709,-3.023935,Microwave Oven,OFF,synthetic_catalog,1300
+-1428.4452,-5.629769,Microwave Oven,OFF,synthetic_catalog,1300
+-1267.9556,-6.301613,Microwave Oven,OFF,synthetic_catalog,1300
+-1023.2531,-4.821918,Microwave Oven,OFF,synthetic_catalog,1300
+-774.2494,-4.078485,Microwave Oven,OFF,synthetic_catalog,1300
+-664.4395,-4.633447,Microwave Oven,OFF,synthetic_catalog,1300
+-883.992,-3.792538,Microwave Oven,OFF,synthetic_catalog,1300
+-1220.1716,-5.780508,Microwave Oven,OFF,synthetic_catalog,1300
+101.2397,0.898581,Refrigerator Compressor,ON,synthetic_catalog,250
+95.8312,0.672638,Refrigerator Compressor,ON,synthetic_catalog,250
+144.715,0.507714,Refrigerator Compressor,ON,synthetic_catalog,250
+164.0923,1.056384,Refrigerator Compressor,ON,synthetic_catalog,250
+246.4365,0.869831,Refrigerator Compressor,ON,synthetic_catalog,250
+120.962,0.58028,Refrigerator Compressor,ON,synthetic_catalog,250
+101.6502,1.171746,Refrigerator Compressor,ON,synthetic_catalog,250
+246.8427,1.11939,Refrigerator Compressor,ON,synthetic_catalog,250
+341.1004,1.397964,Refrigerator Compressor,ON,synthetic_catalog,250
+184.3085,0.869478,Refrigerator Compressor,ON,synthetic_catalog,250
+216.5633,0.857802,Refrigerator Compressor,ON,synthetic_catalog,250
+312.3688,1.299255,Refrigerator Compressor,ON,synthetic_catalog,250
+220.3479,0.752434,Refrigerator Compressor,ON,synthetic_catalog,250
+267.511,1.272642,Refrigerator Compressor,ON,synthetic_catalog,250
+265.4001,0.913723,Refrigerator Compressor,ON,synthetic_catalog,250
+253.6743,0.837232,Refrigerator Compressor,ON,synthetic_catalog,250
+277.5085,1.144833,Refrigerator Compressor,ON,synthetic_catalog,250
+179.2181,0.571462,Refrigerator Compressor,ON,synthetic_catalog,250
+-291.3584,-1.509743,Refrigerator Compressor,OFF,synthetic_catalog,250
+-130.7267,-0.892362,Refrigerator Compressor,OFF,synthetic_catalog,250
+-150.5773,-0.939715,Refrigerator Compressor,OFF,synthetic_catalog,250
+-199.3167,-1.232579,Refrigerator Compressor,OFF,synthetic_catalog,250
+-127.4724,-0.648233,Refrigerator Compressor,OFF,synthetic_catalog,250
+-111.5437,-0.735792,Refrigerator Compressor,OFF,synthetic_catalog,250
+-247.5935,-1.334088,Refrigerator Compressor,OFF,synthetic_catalog,250
+-121.8282,-0.597127,Refrigerator Compressor,OFF,synthetic_catalog,250
+-229.1867,-0.615733,Refrigerator Compressor,OFF,synthetic_catalog,250
+-241.0128,-1.038087,Refrigerator Compressor,OFF,synthetic_catalog,250
+-79.7753,-0.640545,Refrigerator Compressor,OFF,synthetic_catalog,250
+-181.1347,-0.553266,Refrigerator Compressor,OFF,synthetic_catalog,250
+-157.7725,-0.526943,Refrigerator Compressor,OFF,synthetic_catalog,250
+-276.3713,-0.73758,Refrigerator Compressor,OFF,synthetic_catalog,250
+-269.8385,-0.96726,Refrigerator Compressor,OFF,synthetic_catalog,250
+-324.0428,-1.419533,Refrigerator Compressor,OFF,synthetic_catalog,250
+-235.6509,-0.859067,Refrigerator Compressor,OFF,synthetic_catalog,250
+-120.0257,-0.814382,Refrigerator Compressor,OFF,synthetic_catalog,250
+664.3525,2.441457,Air Conditioner,ON,synthetic_catalog,1500
+2067.6862,6.564841,Air Conditioner,ON,synthetic_catalog,1500
+658.3816,6.729401,Air Conditioner,ON,synthetic_catalog,1500
+584.5369,4.00123,Air Conditioner,ON,synthetic_catalog,1500
+1543.3055,7.186152,Air Conditioner,ON,synthetic_catalog,1500
+605.2428,3.58928,Air Conditioner,ON,synthetic_catalog,1500
+1216.8371,5.109289,Air Conditioner,ON,synthetic_catalog,1500
+781.1707,6.035308,Air Conditioner,ON,synthetic_catalog,1500
+2040.8633,7.218395,Air Conditioner,ON,synthetic_catalog,1500
+1113.8388,7.592832,Air Conditioner,ON,synthetic_catalog,1500
+1712.5934,5.923111,Air Conditioner,ON,synthetic_catalog,1500
+1310.9437,7.910182,Air Conditioner,ON,synthetic_catalog,1500
+1687.4,4.632216,Air Conditioner,ON,synthetic_catalog,1500
+1904.1751,4.634002,Air Conditioner,ON,synthetic_catalog,1500
+1737.3252,7.543823,Air Conditioner,ON,synthetic_catalog,1500
+640.693,3.708898,Air Conditioner,ON,synthetic_catalog,1500
+916.3294,3.662869,Air Conditioner,ON,synthetic_catalog,1500
+1427.1343,3.719022,Air Conditioner,ON,synthetic_catalog,1500
+-603.8169,-3.543937,Air Conditioner,OFF,synthetic_catalog,1500
+-642.2607,-6.416578,Air Conditioner,OFF,synthetic_catalog,1500
+-954.9804,-4.22866,Air Conditioner,OFF,synthetic_catalog,1500
+-1091.5538,-3.392269,Air Conditioner,OFF,synthetic_catalog,1500
+-1471.5017,-3.753176,Air Conditioner,OFF,synthetic_catalog,1500
+-1595.6994,-5.422497,Air Conditioner,OFF,synthetic_catalog,1500
+-1839.6146,-6.169813,Air Conditioner,OFF,synthetic_catalog,1500
+-2064.8346,-6.308366,Air Conditioner,OFF,synthetic_catalog,1500
+-789.1308,-6.240463,Air Conditioner,OFF,synthetic_catalog,1500
+-1533.9451,-6.690203,Air Conditioner,OFF,synthetic_catalog,1500
+-1676.4712,-5.638804,Air Conditioner,OFF,synthetic_catalog,1500
+-1154.0618,-5.903351,Air Conditioner,OFF,synthetic_catalog,1500
+-1614.72,-8.435873,Air Conditioner,OFF,synthetic_catalog,1500
+-1937.9631,-7.85658,Air Conditioner,OFF,synthetic_catalog,1500
+-1386.2105,-3.925989,Air Conditioner,OFF,synthetic_catalog,1500
+-1397.3745,-8.622311,Air Conditioner,OFF,synthetic_catalog,1500
+-2000.0424,-4.482507,Air Conditioner,OFF,synthetic_catalog,1500
+-1475.6622,-5.577475,Air Conditioner,OFF,synthetic_catalog,1500
+1079.9014,3.500589,Clothes Iron,ON,synthetic_catalog,1200
+1090.004,4.254441,Clothes Iron,ON,synthetic_catalog,1200
+794.9805,4.074853,Clothes Iron,ON,synthetic_catalog,1200
+1083.2333,4.884565,Clothes Iron,ON,synthetic_catalog,1200
+932.2348,5.035269,Clothes Iron,ON,synthetic_catalog,1200
+1403.8362,5.551533,Clothes Iron,ON,synthetic_catalog,1200
+1441.4205,4.468541,Clothes Iron,ON,synthetic_catalog,1200
+1211.0303,4.394795,Clothes Iron,ON,synthetic_catalog,1200
+861.8492,4.009364,Clothes Iron,ON,synthetic_catalog,1200
+1148.0168,5.125033,Clothes Iron,ON,synthetic_catalog,1200
+1219.1694,6.008715,Clothes Iron,ON,synthetic_catalog,1200
+714.2062,4.877662,Clothes Iron,ON,synthetic_catalog,1200
+955.8937,4.329502,Clothes Iron,ON,synthetic_catalog,1200
+1140.9045,5.309821,Clothes Iron,ON,synthetic_catalog,1200
+1148.2596,5.935621,Clothes Iron,ON,synthetic_catalog,1200
+1384.3852,5.011644,Clothes Iron,ON,synthetic_catalog,1200
+734.0749,3.254907,Clothes Iron,ON,synthetic_catalog,1200
+866.0834,4.472922,Clothes Iron,ON,synthetic_catalog,1200
+-775.7752,-3.577639,Clothes Iron,OFF,synthetic_catalog,1200
+-1365.4992,-4.905467,Clothes Iron,OFF,synthetic_catalog,1200
+-723.337,-3.042638,Clothes Iron,OFF,synthetic_catalog,1200
+-1097.4841,-4.963345,Clothes Iron,OFF,synthetic_catalog,1200
+-653.58,-4.466592,Clothes Iron,OFF,synthetic_catalog,1200
+-787.0814,-4.601206,Clothes Iron,OFF,synthetic_catalog,1200
+-810.6387,-4.408586,Clothes Iron,OFF,synthetic_catalog,1200
+-1273.0594,-5.879364,Clothes Iron,OFF,synthetic_catalog,1200
+-985.1088,-4.183391,Clothes Iron,OFF,synthetic_catalog,1200
+-1431.1017,-4.786447,Clothes Iron,OFF,synthetic_catalog,1200
+-1150.9882,-3.736328,Clothes Iron,OFF,synthetic_catalog,1200
+-669.3453,-3.671337,Clothes Iron,OFF,synthetic_catalog,1200
+-877.1092,-5.12543,Clothes Iron,OFF,synthetic_catalog,1200
+-1498.0914,-6.162115,Clothes Iron,OFF,synthetic_catalog,1200
+-1326.4829,-5.968722,Clothes Iron,OFF,synthetic_catalog,1200
+-1027.1437,-4.134981,Clothes Iron,OFF,synthetic_catalog,1200
+-1348.6465,-4.751451,Clothes Iron,OFF,synthetic_catalog,1200
+-1397.3888,-4.377784,Clothes Iron,OFF,synthetic_catalog,1200
+300.0059,1.16417,Blender,ON,synthetic_catalog,350
+312.1416,1.295798,Blender,ON,synthetic_catalog,350
+230.7928,1.120485,Blender,ON,synthetic_catalog,350
+334.5444,1.332108,Blender,ON,synthetic_catalog,350
+131.7455,1.460285,Blender,ON,synthetic_catalog,350
+174.3865,1.042321,Blender,ON,synthetic_catalog,350
+466.7609,1.823928,Blender,ON,synthetic_catalog,350
+351.9803,1.957961,Blender,ON,synthetic_catalog,350
+357.6983,1.4567,Blender,ON,synthetic_catalog,350
+180.6244,1.012037,Blender,ON,synthetic_catalog,350
+212.8738,1.393744,Blender,ON,synthetic_catalog,350
+287.9114,1.103019,Blender,ON,synthetic_catalog,350
+126.4285,1.617595,Blender,ON,synthetic_catalog,350
+268.0992,0.835328,Blender,ON,synthetic_catalog,350
+378.7168,1.416018,Blender,ON,synthetic_catalog,350
+177.7569,1.424128,Blender,ON,synthetic_catalog,350
+476.0034,1.625679,Blender,ON,synthetic_catalog,350
+364.3696,1.837504,Blender,ON,synthetic_catalog,350
+-153.4877,-1.32433,Blender,OFF,synthetic_catalog,350
+-373.4978,-1.397389,Blender,OFF,synthetic_catalog,350
+-204.8536,-1.336789,Blender,OFF,synthetic_catalog,350
+-375.5748,-1.625331,Blender,OFF,synthetic_catalog,350
+-399.2899,-1.050083,Blender,OFF,synthetic_catalog,350
+-165.5101,-1.325074,Blender,OFF,synthetic_catalog,350
+-416.9093,-2.079689,Blender,OFF,synthetic_catalog,350
+-376.3498,-1.644488,Blender,OFF,synthetic_catalog,350
+-122.9596,-1.383291,Blender,OFF,synthetic_catalog,350
+-272.8019,-0.81313,Blender,OFF,synthetic_catalog,350
+-225.1882,-0.927237,Blender,OFF,synthetic_catalog,350
+-364.9305,-1.609221,Blender,OFF,synthetic_catalog,350
+-390.0135,-1.071301,Blender,OFF,synthetic_catalog,350
+-237.8846,-1.473527,Blender,OFF,synthetic_catalog,350
+-187.4221,-1.16952,Blender,OFF,synthetic_catalog,350
+-171.0271,-0.849267,Blender,OFF,synthetic_catalog,350
+-395.2139,-0.990746,Blender,OFF,synthetic_catalog,350
+-264.6759,-1.275099,Blender,OFF,synthetic_catalog,350
+287.4905,2.887061,Washing Machine,ON,synthetic_catalog,700
+660.7552,3.896552,Washing Machine,ON,synthetic_catalog,700
+651.915,2.177528,Washing Machine,ON,synthetic_catalog,700
+1061.3253,5.091917,Washing Machine,ON,synthetic_catalog,700
+594.7606,2.782959,Washing Machine,ON,synthetic_catalog,700
+433.5505,2.286066,Washing Machine,ON,synthetic_catalog,700
+1057.6541,4.940999,Washing Machine,ON,synthetic_catalog,700
+1093.5093,3.564679,Washing Machine,ON,synthetic_catalog,700
+1020.1545,3.51365,Washing Machine,ON,synthetic_catalog,700
+387.63,2.050652,Washing Machine,ON,synthetic_catalog,700
+660.3924,3.151503,Washing Machine,ON,synthetic_catalog,700
+397.5589,3.180743,Washing Machine,ON,synthetic_catalog,700
+184.492,1.422085,Washing Machine,ON,synthetic_catalog,700
+1083.2754,4.64327,Washing Machine,ON,synthetic_catalog,700
+886.0674,3.813715,Washing Machine,ON,synthetic_catalog,700
+697.7756,2.864087,Washing Machine,ON,synthetic_catalog,700
+1200.0,3.019997,Washing Machine,ON,synthetic_catalog,700
+1097.8301,4.276593,Washing Machine,ON,synthetic_catalog,700
+-1105.7411,-2.20777,Washing Machine,OFF,synthetic_catalog,700
+-679.2532,-3.932201,Washing Machine,OFF,synthetic_catalog,700
+-922.3457,-3.664852,Washing Machine,OFF,synthetic_catalog,700
+-354.3067,-2.493808,Washing Machine,OFF,synthetic_catalog,700
+-543.0571,-3.646244,Washing Machine,OFF,synthetic_catalog,700
+-281.6292,-2.661102,Washing Machine,OFF,synthetic_catalog,700
+-927.2836,-2.256889,Washing Machine,OFF,synthetic_catalog,700
+-781.9911,-4.091604,Washing Machine,OFF,synthetic_catalog,700
+-807.1293,-3.049316,Washing Machine,OFF,synthetic_catalog,700
+-999.0544,-2.767141,Washing Machine,OFF,synthetic_catalog,700
+-730.384,-2.450004,Washing Machine,OFF,synthetic_catalog,700
+-1085.0925,-2.667972,Washing Machine,OFF,synthetic_catalog,700
+-220.6059,-1.252359,Washing Machine,OFF,synthetic_catalog,700
+-191.0625,-1.157657,Washing Machine,OFF,synthetic_catalog,700
+-926.016,-3.554137,Washing Machine,OFF,synthetic_catalog,700
+-626.6829,-2.349974,Washing Machine,OFF,synthetic_catalog,700
+-740.8878,-4.134006,Washing Machine,OFF,synthetic_catalog,700
+-516.4703,-2.754395,Washing Machine,OFF,synthetic_catalog,700
+323.7248,1.593883,Water Dispenser Hot,ON,synthetic_catalog,550
+568.5427,2.911747,Water Dispenser Hot,ON,synthetic_catalog,550
+630.7556,2.793257,Water Dispenser Hot,ON,synthetic_catalog,550
+530.3034,2.785086,Water Dispenser Hot,ON,synthetic_catalog,550
+291.5493,1.52353,Water Dispenser Hot,ON,synthetic_catalog,550
+598.218,2.910127,Water Dispenser Hot,ON,synthetic_catalog,550
+332.9006,2.326079,Water Dispenser Hot,ON,synthetic_catalog,550
+623.8519,2.815832,Water Dispenser Hot,ON,synthetic_catalog,550
+507.4369,1.918632,Water Dispenser Hot,ON,synthetic_catalog,550
+646.1286,2.169784,Water Dispenser Hot,ON,synthetic_catalog,550
+281.2914,1.430931,Water Dispenser Hot,ON,synthetic_catalog,550
+262.8599,1.289937,Water Dispenser Hot,ON,synthetic_catalog,550
+601.3983,2.691531,Water Dispenser Hot,ON,synthetic_catalog,550
+262.5616,2.372083,Water Dispenser Hot,ON,synthetic_catalog,550
+658.2227,2.954059,Water Dispenser Hot,ON,synthetic_catalog,550
+665.4229,1.882881,Water Dispenser Hot,ON,synthetic_catalog,550
+298.6047,2.485551,Water Dispenser Hot,ON,synthetic_catalog,550
+694.5122,2.243891,Water Dispenser Hot,ON,synthetic_catalog,550
+-563.9786,-2.274163,Water Dispenser Hot,OFF,synthetic_catalog,550
+-401.5338,-1.584404,Water Dispenser Hot,OFF,synthetic_catalog,550
+-431.808,-2.48037,Water Dispenser Hot,OFF,synthetic_catalog,550
+-584.5998,-2.645016,Water Dispenser Hot,OFF,synthetic_catalog,550
+-330.2442,-1.579654,Water Dispenser Hot,OFF,synthetic_catalog,550
+-506.2445,-1.844801,Water Dispenser Hot,OFF,synthetic_catalog,550
+-340.368,-1.262966,Water Dispenser Hot,OFF,synthetic_catalog,550
+-567.3671,-2.13567,Water Dispenser Hot,OFF,synthetic_catalog,550
+-567.011,-2.501779,Water Dispenser Hot,OFF,synthetic_catalog,550
+-332.1593,-2.152218,Water Dispenser Hot,OFF,synthetic_catalog,550
+-556.4705,-2.512695,Water Dispenser Hot,OFF,synthetic_catalog,550
+-441.9762,-2.189998,Water Dispenser Hot,OFF,synthetic_catalog,550
+-278.1444,-1.40587,Water Dispenser Hot,OFF,synthetic_catalog,550
+-342.2345,-1.462379,Water Dispenser Hot,OFF,synthetic_catalog,550
+-303.0933,-1.612977,Water Dispenser Hot,OFF,synthetic_catalog,550
+-279.8422,-1.378018,Water Dispenser Hot,OFF,synthetic_catalog,550
+-335.8183,-1.888568,Water Dispenser Hot,OFF,synthetic_catalog,550
+-314.4906,-1.6041,Water Dispenser Hot,OFF,synthetic_catalog,550
+1324.1618,5.493366,Electric Oven,ON,synthetic_catalog,2200
+1965.1412,7.715529,Electric Oven,ON,synthetic_catalog,2200
+2580.6188,10.207027,Electric Oven,ON,synthetic_catalog,2200
+2286.8985,9.620466,Electric Oven,ON,synthetic_catalog,2200
+1840.3114,7.501839,Electric Oven,ON,synthetic_catalog,2200
+2507.3065,9.917148,Electric Oven,ON,synthetic_catalog,2200
+2329.3094,8.962466,Electric Oven,ON,synthetic_catalog,2200
+2124.6906,11.642542,Electric Oven,ON,synthetic_catalog,2200
+2190.6544,9.072443,Electric Oven,ON,synthetic_catalog,2200
+1797.871,9.111616,Electric Oven,ON,synthetic_catalog,2200
+1482.2554,8.740985,Electric Oven,ON,synthetic_catalog,2200
+1600.9926,6.702973,Electric Oven,ON,synthetic_catalog,2200
+1810.7198,9.57341,Electric Oven,ON,synthetic_catalog,2200
+1818.3832,7.292436,Electric Oven,ON,synthetic_catalog,2200
+2000.8664,11.11583,Electric Oven,ON,synthetic_catalog,2200
+1809.3058,7.17471,Electric Oven,ON,synthetic_catalog,2200
+1533.6142,7.074496,Electric Oven,ON,synthetic_catalog,2200
+1864.7555,6.773137,Electric Oven,ON,synthetic_catalog,2200
+-1844.0827,-6.093191,Electric Oven,OFF,synthetic_catalog,2200
+-2282.7183,-9.011137,Electric Oven,OFF,synthetic_catalog,2200
+-1445.6855,-6.886965,Electric Oven,OFF,synthetic_catalog,2200
+-2354.9655,-10.052943,Electric Oven,OFF,synthetic_catalog,2200
+-1232.4441,-8.911666,Electric Oven,OFF,synthetic_catalog,2200
+-2181.3153,-6.367151,Electric Oven,OFF,synthetic_catalog,2200
+-2452.9705,-6.733735,Electric Oven,OFF,synthetic_catalog,2200
+-1258.0246,-9.475982,Electric Oven,OFF,synthetic_catalog,2200
+-1689.8325,-5.700222,Electric Oven,OFF,synthetic_catalog,2200
+-1188.5416,-7.512421,Electric Oven,OFF,synthetic_catalog,2200
+-1992.0134,-7.374031,Electric Oven,OFF,synthetic_catalog,2200
+-2347.9388,-9.646797,Electric Oven,OFF,synthetic_catalog,2200
+-1073.0321,-7.111248,Electric Oven,OFF,synthetic_catalog,2200
+-1677.8806,-7.499158,Electric Oven,OFF,synthetic_catalog,2200
+-1809.4975,-7.195601,Electric Oven,OFF,synthetic_catalog,2200
+-2038.7103,-7.463764,Electric Oven,OFF,synthetic_catalog,2200
+-2100.3647,-8.602056,Electric Oven,OFF,synthetic_catalog,2200
+-1052.1363,-7.840859,Electric Oven,OFF,synthetic_catalog,2200
+2010.345,6.709372,Induction Cooker,ON,synthetic_catalog,1800
+2145.447,9.164085,Induction Cooker,ON,synthetic_catalog,1800
+1796.8366,8.323488,Induction Cooker,ON,synthetic_catalog,1800
+2133.2933,7.480752,Induction Cooker,ON,synthetic_catalog,1800
+969.5326,5.840596,Induction Cooker,ON,synthetic_catalog,1800
+1783.0622,7.764152,Induction Cooker,ON,synthetic_catalog,1800
+2121.3516,8.353115,Induction Cooker,ON,synthetic_catalog,1800
+2082.8651,6.244738,Induction Cooker,ON,synthetic_catalog,1800
+1035.4446,7.409941,Induction Cooker,ON,synthetic_catalog,1800
+1162.5301,5.260105,Induction Cooker,ON,synthetic_catalog,1800
+1401.7782,6.217339,Induction Cooker,ON,synthetic_catalog,1800
+1292.4771,6.027035,Induction Cooker,ON,synthetic_catalog,1800
+1578.1627,7.760569,Induction Cooker,ON,synthetic_catalog,1800
+1038.9649,6.361918,Induction Cooker,ON,synthetic_catalog,1800
+1362.3864,5.245342,Induction Cooker,ON,synthetic_catalog,1800
+1039.7845,5.744501,Induction Cooker,ON,synthetic_catalog,1800
+2068.0241,7.38177,Induction Cooker,ON,synthetic_catalog,1800
+1909.7732,7.579756,Induction Cooker,ON,synthetic_catalog,1800
+-1438.9722,-6.351183,Induction Cooker,OFF,synthetic_catalog,1800
+-1523.7962,-5.153224,Induction Cooker,OFF,synthetic_catalog,1800
+-1954.1272,-5.114329,Induction Cooker,OFF,synthetic_catalog,1800
+-1317.1212,-5.062545,Induction Cooker,OFF,synthetic_catalog,1800
+-1686.9384,-5.167968,Induction Cooker,OFF,synthetic_catalog,1800
+-1837.527,-6.434367,Induction Cooker,OFF,synthetic_catalog,1800
+-1996.9066,-7.028201,Induction Cooker,OFF,synthetic_catalog,1800
+-2147.9634,-6.470586,Induction Cooker,OFF,synthetic_catalog,1800
+-1806.9465,-5.312025,Induction Cooker,OFF,synthetic_catalog,1800
+-2017.6487,-6.961358,Induction Cooker,OFF,synthetic_catalog,1800
+-1518.2862,-7.24639,Induction Cooker,OFF,synthetic_catalog,1800
+-1320.1124,-7.326665,Induction Cooker,OFF,synthetic_catalog,1800
+-1700.4612,-6.242655,Induction Cooker,OFF,synthetic_catalog,1800
+-1560.8431,-4.892886,Induction Cooker,OFF,synthetic_catalog,1800
+-1129.8438,-4.733562,Induction Cooker,OFF,synthetic_catalog,1800
+-1282.9635,-7.861604,Induction Cooker,OFF,synthetic_catalog,1800
+-1890.9846,-7.618259,Induction Cooker,OFF,synthetic_catalog,1800
+-1784.4405,-5.530553,Induction Cooker,OFF,synthetic_catalog,1800
+771.7727,2.441605,Vacuum Cleaner,ON,synthetic_catalog,1000
+642.049,2.923441,Vacuum Cleaner,ON,synthetic_catalog,1000
+417.0315,1.732561,Vacuum Cleaner,ON,synthetic_catalog,1000
+988.9781,3.515703,Vacuum Cleaner,ON,synthetic_catalog,1000
+1028.6776,2.985516,Vacuum Cleaner,ON,synthetic_catalog,1000
+495.1892,4.307191,Vacuum Cleaner,ON,synthetic_catalog,1000
+754.7655,4.550183,Vacuum Cleaner,ON,synthetic_catalog,1000
+1121.9672,4.440582,Vacuum Cleaner,ON,synthetic_catalog,1000
+1282.0788,4.294285,Vacuum Cleaner,ON,synthetic_catalog,1000
+1207.8051,3.347762,Vacuum Cleaner,ON,synthetic_catalog,1000
+655.1927,4.144759,Vacuum Cleaner,ON,synthetic_catalog,1000
+1310.0338,5.407307,Vacuum Cleaner,ON,synthetic_catalog,1000
+711.4187,2.703575,Vacuum Cleaner,ON,synthetic_catalog,1000
+1097.9784,5.00672,Vacuum Cleaner,ON,synthetic_catalog,1000
+974.3599,4.32891,Vacuum Cleaner,ON,synthetic_catalog,1000
+896.4844,2.686882,Vacuum Cleaner,ON,synthetic_catalog,1000
+562.8204,3.678106,Vacuum Cleaner,ON,synthetic_catalog,1000
+1231.4985,5.410639,Vacuum Cleaner,ON,synthetic_catalog,1000
+-965.3879,-4.564864,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-729.6448,-4.512096,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-670.7819,-3.534408,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-662.1788,-3.373826,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-822.9537,-2.346272,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-761.0857,-3.907443,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-507.3658,-3.314723,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-948.5811,-4.56848,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-1150.8588,-4.229047,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-446.6128,-3.096263,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-1273.1652,-4.029469,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-781.5399,-4.371272,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-1020.8018,-2.650323,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-1393.0808,-4.096144,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-920.0527,-2.783448,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-827.5088,-4.940355,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-1296.455,-4.159654,Vacuum Cleaner,OFF,synthetic_catalog,1000
+-1067.5546,-5.071464,Vacuum Cleaner,OFF,synthetic_catalog,1000

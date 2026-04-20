@@ -1,37 +1,54 @@
 {
   "model_path": "C:\\Users\\kirit\\Downloads\\sems\\backend\\ml_pipeline\\appliance_model.joblib",
   "training": {
-    "rows_total": 29,
-    "rows_after_cleaning": 25,
-    "train_rows": 20,
-    "test_rows": 5,
+    "rows_total": 135,
+    "rows_after_cleaning": 135,
+    "train_rows": 108,
+    "test_rows": 27,
     "class_distribution": {
-      "Fan": 13,
-      "Phone Charger": 12
+      "Fan": 49,
+      "Phone Charger": 48,
+      "Laptop Charger": 38
     },
     "features": [
-      "Power_Jump_Watts",
-      "Current_Jump_Amps"
-    ]
+      "Power_Jump_Abs_Watts",
+      "Current_Jump_Abs_Amps",
+      "Event_Type_Code",
+      "Power_Current_Ratio"
+    ],
+    "event_distribution": {
+      "ON": 81,
+      "OFF": 54
+    },
+    "source_distribution": {
+      "synthetic_catalog": 108,
+      "user_existing": 27
+    }
   },
   "metrics": {
-    "accuracy": 1.0,
-    "balanced_accuracy": 1.0,
-    "macro_f1": 1.0,
+    "accuracy": 0.6296296296296297,
+    "balanced_accuracy": 0.580952380952381,
+    "macro_f1": 0.5634920634920634,
     "top3_accuracy": 1.0
   },
   "per_class": {
     "Fan": {
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1_score": 1.0,
-      "support": 3
+      "precision": 0.5454545454545454,
+      "recall": 0.6,
+      "f1_score": 0.5714285714285714,
+      "support": 10
+    },
+    "Laptop Charger": {
+      "precision": 0.2,
+      "recall": 0.14285714285714285,
+      "f1_score": 0.16666666666666666,
+      "support": 7
     },
     "Phone Charger": {
-      "precision": 1.0,
+      "precision": 0.9090909090909091,
       "recall": 1.0,
-      "f1_score": 1.0,
-      "support": 2
+      "f1_score": 0.9523809523809523,
+      "support": 10
     }
   }
 }
