@@ -39,7 +39,18 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         print("🔴 ESP32 Disconnected")
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
+        # 1. Handle ESP32 Heartbeat
+        if text_data == "ping":
+            # Respond to keep the connection alive
+            await self.send(text_data="pong")
+            return
+
+        # 2. Safely parse JSON
+        try:
+            data = json.loads(text_data)
+        except json.JSONDecodeError:
+            print(f"⚠️ Ignored invalid JSON: {text_data}")
+            return
 
         power = float(data.get('power', 0.0))
         current = float(data.get('current', 0.0))
