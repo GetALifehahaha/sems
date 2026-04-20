@@ -1,13 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, XCircle, Pencil } from "lucide-react";
 import { fetchJson } from "@/shared";
 
 const GoalTracker = ({
     liveData = {},
     isLoading = false,
-    PAYMENT_RATE = 12,
+    targetKwh = 150,
+    costRate = 12,
+    cycleStartDay = 1,
+    prefsLoading = false,
+    onEditPreferences,
 }) => {
     const [backendGoal, setBackendGoal] = useState({
         kwh_used: 0,
@@ -32,7 +36,7 @@ const GoalTracker = ({
                         signal: controller.signal,
                         query: {
                             kwh: liveData.kwhConsumption,
-                            payment_rate: PAYMENT_RATE,
+                            payment_rate: costRate,
                         },
                     },
                 );
@@ -52,12 +56,10 @@ const GoalTracker = ({
             }
         };
 
-        if (!isLoading) {
-            loadGoal();
-        }
+        if (!isLoading) loadGoal();
 
         return () => controller.abort();
-    }, [liveData.kwhConsumption, PAYMENT_RATE, isLoading]);
+    }, [liveData.kwhConsumption, costRate, isLoading]);
 
     const goalData = useMemo(() => {
         const monthlyTargetKwh = Number(backendGoal?.monthly_target_kwh) || 150;
@@ -92,11 +94,10 @@ const GoalTracker = ({
             remaining,
             monthlyTargetKwh,
             costUsed,
-            costRemaining,
             daysRemaining,
             dailyAllowance,
             status,
-            statusIcon: statusIcon,
+            statusIcon,
             statusColor,
             statusLabel,
         };
@@ -107,9 +108,20 @@ const GoalTracker = ({
     return (
         <Card className="p-4 md:p-5">
             <div className="mb-4">
-                <h3 className="text-base md:text-lg font-bold mb-1">
-                    Monthly Budget Tracker
-                </h3>
+                <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-base md:text-lg font-bold">
+                        Monthly Budget Tracker
+                    </h3>
+                    {onEditPreferences && (
+                        <button
+                            onClick={onEditPreferences}
+                            className="p-1.5 hover:bg-muted rounded-lg transition-colors text-text/50 hover:text-primary"
+                            aria-label="Edit budget preferences"
+                        >
+                            <Pencil className="w-4 h-4" />
+                        </button>
+                    )}
+                </div>
                 <p className="text-xs md:text-sm text-muted-foreground">
                     Target: {goalData.monthlyTargetKwh} kWh
                 </p>

@@ -23,7 +23,6 @@ import { Zap, Monitor, Fan, Coffee, Plug, Lightbulb, Tv, Activity } from "lucide
 import { fetchJson } from "@/shared";
 
 const FREQUENCY_OPTIONS = ["daily", "weekly", "monthly"];
-const PAYMENT_RATE = 12;
 
 const getWsUrl = () => {
     const baseUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000";
@@ -166,6 +165,9 @@ const Dashboard = () => {
         };
     }, []);
 
+    const { prefs, loading: prefsLoading, saving, error: saveError, savePreferences } = usePreferences();
+    const [showPrefsModal, setShowPrefsModal] = useState(false);
+
     const handleFrequency = useCallback((value) => {
         startTransition(() => {
             setFrequency(value);
@@ -194,12 +196,22 @@ const Dashboard = () => {
 
     return (
         <div className="p-4 md:p-6 flex flex-col mb-8">
-            <Header liveData={liveData} PAYMENT_RATE={PAYMENT_RATE} />
+            <Header liveData={liveData} PAYMENT_RATE={prefs.costRate} />
+
+            {showPrefsModal && (
+                <PreferencesModal
+                    prefs={prefs}
+                    saving={saving}
+                    saveError={saveError}
+                    onSave={savePreferences}
+                    onClose={() => setShowPrefsModal(false)}
+                />
+            )}
 
             <QuickStatsCards
                 liveData={liveData}
                 isLoading={isLiveLoading}
-                PAYMENT_RATE={PAYMENT_RATE}
+                PAYMENT_RATE={prefs.costRate}
             />
 
             <StatusIndicator
@@ -366,7 +378,11 @@ const Dashboard = () => {
                     <GoalTracker
                         liveData={liveData}
                         isLoading={isLiveLoading}
-                        PAYMENT_RATE={PAYMENT_RATE}
+                        targetKwh={prefs.targetKwh}
+                        costRate={prefs.costRate}
+                        cycleStartDay={prefs.cycleStartDay}
+                        prefsLoading={prefsLoading}
+                        onEditPreferences={() => setShowPrefsModal(true)}
                     />
                 </div>
             </div>
