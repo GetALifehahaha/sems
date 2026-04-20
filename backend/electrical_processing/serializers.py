@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
-from .models import ElectricalReading
+from .models import DashboardPreference, ElectricalReading
 
 from backend.settings import INTERVAL
 
@@ -40,3 +40,25 @@ class ElectricalReadingSerializer(serializers.ModelSerializer):
             power=power,
             kwh_consumption=total_kwh
         )
+
+
+class DashboardPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DashboardPreference
+        fields = ["target_kwh", "cost_rate", "cycle_start_day", "updated_at"]
+        read_only_fields = ["updated_at"]
+
+    def validate_target_kwh(self, value):
+        if value < 1 or value > 10000:
+            raise serializers.ValidationError("target_kwh must be between 1 and 10000.")
+        return value
+
+    def validate_cost_rate(self, value):
+        if value < 0.01 or value > 1000:
+            raise serializers.ValidationError("cost_rate must be between 0.01 and 1000.")
+        return value
+
+    def validate_cycle_start_day(self, value):
+        if value < 1 or value > 28:
+            raise serializers.ValidationError("cycle_start_day must be between 1 and 28.")
+        return value

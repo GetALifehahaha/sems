@@ -11,3 +11,13 @@ class ElectricalReading(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+
+
+class DashboardPreference(models.Model):
+    target_kwh = models.FloatField(default=150.0)
+    cost_rate = models.FloatField(default=12.0)
+    cycle_start_day = models.PositiveSmallIntegerField(default=1)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['id']

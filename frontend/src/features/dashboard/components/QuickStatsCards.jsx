@@ -10,6 +10,7 @@ const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
         average_usage: 0,
         projected_cost: 0,
         budget_usage_percent: 0,
+        monthly_target_kwh: 150,
     });
 
     useEffect(() => {
@@ -37,6 +38,7 @@ const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
                     average_usage: 0,
                     projected_cost: 0,
                     budget_usage_percent: 0,
+                    monthly_target_kwh: 150,
                 });
             }
         };
@@ -58,6 +60,7 @@ const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
         const peakUsageToday = Number(backendStats?.peak_usage_today) || 0;
         const averageUsage = Number(backendStats?.average_usage) || 0;
         const budgetUsagePercent = Number(backendStats?.budget_usage_percent) || 0;
+        const monthlyTargetKwh = Number(backendStats?.monthly_target_kwh) || 150;
         const projectedCostValue = (Number(backendStats?.projected_cost) || 0).toFixed(2);
 
         return [
@@ -82,7 +85,7 @@ const QuickStatsCards = ({ liveData, isLoading, PAYMENT_RATE = 12 }) => {
             {
                 label: "Budget Usage",
                 value: isLoading ? "--" : `${Math.round(budgetUsagePercent)}%`,
-                unit: "of 150 kWh",
+                unit: `of ${monthlyTargetKwh.toFixed(0)} kWh`,
                 icon: "Target",
             },
         ];

@@ -3,7 +3,6 @@ import React, {
     useDeferredValue,
     useEffect,
     useId,
-    useMemo,
     useState,
     useTransition,
     useRef
@@ -18,6 +17,8 @@ import {
     HourlyBreakdown,
     GoalTracker,
     HistoricalComparison,
+    PreferencesModal,
+    usePreferences,
 } from "..";
 import { Zap, Monitor, Fan, Coffee, Plug, Lightbulb, Tv, Activity } from "lucide-react";
 import { fetchJson } from "@/shared";
@@ -167,6 +168,7 @@ const Dashboard = () => {
 
     const { prefs, loading: prefsLoading, saving, error: saveError, savePreferences } = usePreferences();
     const [showPrefsModal, setShowPrefsModal] = useState(false);
+    const paymentRate = Number(prefs?.costRate) || 0;
 
     const handleFrequency = useCallback((value) => {
         startTransition(() => {
@@ -174,29 +176,25 @@ const Dashboard = () => {
         });
     }, []);
 
-    const formattedLiveData = useMemo(() => {
-        if (isLiveLoading) {
-            return {
-                voltage: "--",
-                power: "--",
-                current: "--",
-                kwhConsumption: "--",
-                todayKwhUsage: "--",
-            };
+    const formattedLiveData = isLiveLoading
+        ? {
+            voltage: "--",
+            power: "--",
+            current: "--",
+            kwhConsumption: "--",
+            todayKwhUsage: "--",
         }
-
-        return {
+        : {
             voltage: liveData.voltage.toFixed(1),
             power: liveData.power.toFixed(1),
             current: liveData.current.toFixed(3),
             kwhConsumption: liveData.todayKwhUsage.toFixed(2),
             todayKwhUsage: liveData.todayKwhUsage.toFixed(2),
         };
-    }, [isLiveLoading, liveData]);
 
     return (
         <div className="p-4 md:p-6 flex flex-col mb-8">
-            <Header liveData={liveData} PAYMENT_RATE={prefs.costRate} />
+            <Header liveData={liveData} PAYMENT_RATE={paymentRate} />
 
             {showPrefsModal && (
                 <PreferencesModal
@@ -211,7 +209,7 @@ const Dashboard = () => {
             <QuickStatsCards
                 liveData={liveData}
                 isLoading={isLiveLoading}
-                PAYMENT_RATE={prefs.costRate}
+                PAYMENT_RATE={paymentRate}
             />
 
             <StatusIndicator
@@ -328,7 +326,7 @@ const Dashboard = () => {
                                     ) : (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {liveData.activeAppliances.map((app, idx) => {
-                                                const costPerHour = ((app.power / 1000) * PAYMENT_RATE).toFixed(2);
+                                                const costPerHour = ((app.power / 1000) * paymentRate).toFixed(2);
                                                 return (
                                                     <div key={idx} className="flex flex-col p-4 bg-white rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-shadow">
                                                         <div className="flex justify-between items-start mb-3">
@@ -397,7 +395,7 @@ const Dashboard = () => {
             <div className="mt-6 bg-white rounded-2xl shadow-xl">
                 <PaymentBlock
                     kwh={liveData.todayKwhUsage}
-                    rate={PAYMENT_RATE}
+                    rate={paymentRate}
                     isLoading={isLiveLoading}
                 />
             </div>

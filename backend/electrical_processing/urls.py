@@ -1,6 +1,7 @@
 from django.urls import path #type: ignore
 
 from .views import (
+    DashboardPreferenceView,
     ElectricReadingCreateView,
     ElectricalPeriodicReadingView,
     ElectricalReadingView,
@@ -10,6 +11,7 @@ from .views import (
     DashboardHourlyBreakdownView,
     DashboardHistoricalComparisonView,
     ElectricalNotificationsView,
+    discover,
 )
 
 urlpatterns = [
@@ -28,7 +30,9 @@ urlpatterns = [
     path("dashboard/goal-tracker/", DashboardGoalTrackerView.as_view(), name="dashboard-goal-tracker"),
     path("dashboard/hourly-breakdown/", DashboardHourlyBreakdownView.as_view(), name="dashboard-hourly-breakdown"),
     path("dashboard/historical-comparison/", DashboardHistoricalComparisonView.as_view(), name="dashboard-historical-comparison"),
+    path("preferences/", DashboardPreferenceView.as_view(), name="dashboard-preferences"),
 
     # Alerts
     path("notifications/", ElectricalNotificationsView.as_view(), name="notifications"),
+    path("discover/", discover),
 ]

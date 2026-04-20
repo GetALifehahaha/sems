@@ -151,7 +151,8 @@ INTERVAL = config('INTERVAL', cast=int)
 LOOKBACK_PERIOD = config('LOOKBACK_PERIOD', cast=int)
 
 # HOSTS
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+# ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = ["*"]
 
 # CORS
 CORS_ALLOW_CREDENTIALS = True

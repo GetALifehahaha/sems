@@ -14,3 +14,6 @@ export { default as HourlyBreakdown } from "./components/HourlyBreakdown.jsx";
 export { default as GoalTracker } from "./components/GoalTracker.jsx";
 export { default as HistoricalComparison } from "./components/HistoricalComparison.jsx";
 export { default as PreferencesModal } from "./components/PreferencesModal.jsx";
+
+// HOOKS
+export { usePreferences } from "./hooks/usePreferences.js";

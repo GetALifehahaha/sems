@@ -6,12 +6,19 @@ from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import ElectricalReading
-from .serializers import ElectricalReadingSerializer
+from .models import DashboardPreference, ElectricalReading
+from .serializers import DashboardPreferenceSerializer, ElectricalReadingSerializer
 from backend.settings import LOOKBACK_PERIOD
 
 
 MONTHLY_TARGET_KWH = 150.0
+
+
+def _get_dashboard_preferences():
+    pref = DashboardPreference.objects.order_by("id").first()
+    if pref is None:
+        pref = DashboardPreference.objects.create()
+    return pref
 
 
 def _to_float(value, default=0.0):
@@ -19,6 +26,15 @@ def _to_float(value, default=0.0):
         if value is None or value == "":
             return default
         return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _to_int(value, default=0):
+    try:
+        if value is None or value == "":
+            return default
+        return int(value)
     except (TypeError, ValueError):
         return default
 
@@ -43,6 +59,61 @@ def _month_bounds(now):
     else:
         next_month = start.replace(month=start.month + 1)
     return start, next_month
+
+
+def _normalize_cycle_start_day(value, default=1):
+    return min(28, max(1, _to_int(value, default=default)))
+
+
+def _cycle_bounds(now, cycle_start_day):
+    cycle_day = _normalize_cycle_start_day(cycle_start_day, default=1)
+    month_anchor = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    this_month_cycle_start = month_anchor.replace(day=cycle_day)
+
+    if now < this_month_cycle_start:
+        if this_month_cycle_start.month == 1:
+            cycle_start = this_month_cycle_start.replace(
+                year=this_month_cycle_start.year - 1,
+                month=12,
+            )
+        else:
+            cycle_start = this_month_cycle_start.replace(month=this_month_cycle_start.month - 1)
+    else:
+        cycle_start = this_month_cycle_start
+
+    if cycle_start.month == 12:
+        cycle_end = cycle_start.replace(year=cycle_start.year + 1, month=1)
+    else:
+        cycle_end = cycle_start.replace(month=cycle_start.month + 1)
+
+    return cycle_start, cycle_end
+
+
+def _resolve_dashboard_settings(request, now):
+    pref = _get_dashboard_preferences()
+
+    target_kwh = _to_float(request.query_params.get("target_kwh"), default=pref.target_kwh)
+    if target_kwh <= 0:
+        target_kwh = pref.target_kwh
+
+    payment_rate = _to_float(request.query_params.get("payment_rate"), default=pref.cost_rate)
+    if payment_rate < 0:
+        payment_rate = pref.cost_rate
+
+    cycle_start_day = _normalize_cycle_start_day(
+        request.query_params.get("cycle_start_day"),
+        default=pref.cycle_start_day,
+    )
+
+    cycle_start, cycle_end = _cycle_bounds(now, cycle_start_day)
+
+    return {
+        "target_kwh": target_kwh,
+        "payment_rate": payment_rate,
+        "cycle_start_day": cycle_start_day,
+        "cycle_start": cycle_start,
+        "cycle_end": cycle_end,
+    }
 
 
 def _to_period_datetime(date_str, is_end):
@@ -117,6 +188,23 @@ class ElectricReadingCreateView(generics.CreateAPIView):
     # Allow the ESP32 to bypass security to post data
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
+
+
+class DashboardPreferenceView(APIView):
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        pref = _get_dashboard_preferences()
+        serializer = DashboardPreferenceSerializer(pref)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        pref = _get_dashboard_preferences()
+        serializer = DashboardPreferenceSerializer(pref, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 # --- REACT CHART ENDPOINT ---
 class ElectricalPeriodicReadingView(APIView):
@@ -252,7 +340,12 @@ class DashboardQuickStatsView(APIView):
 
     def get(self, request):
         now = timezone.localtime(timezone.now())
-        payment_rate = _to_float(request.query_params.get("payment_rate"), default=12.0)
+        settings = _resolve_dashboard_settings(request, now)
+        payment_rate = settings["payment_rate"]
+        target_kwh = settings["target_kwh"]
+        cycle_start = settings["cycle_start"]
+        cycle_end = settings["cycle_end"]
+        cycle_start_day = settings["cycle_start_day"]
 
         day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         peak_usage_today = _usage_between(day_start, now)
@@ -271,14 +364,12 @@ class DashboardQuickStatsView(APIView):
         ]
         average_usage = sum(daily_values) / len(daily_values) if daily_values else 0.0
 
-        month_start, month_end = _month_bounds(now)
-        month_usage = _usage_between(month_start, min(now, month_end))
-
-        elapsed_days = max(1, now.day)
-        days_in_month = max(1, (month_end - month_start).days)
-        projected_month_usage = (month_usage / elapsed_days) * days_in_month
-        projected_cost = projected_month_usage * payment_rate
-        budget_usage_percent = (month_usage / MONTHLY_TARGET_KWH) * 100
+        cycle_usage = _usage_between(cycle_start, min(now, cycle_end))
+        elapsed_days = max(1, (now.date() - cycle_start.date()).days + 1)
+        days_in_cycle = max(1, (cycle_end.date() - cycle_start.date()).days)
+        projected_cycle_usage = (cycle_usage / elapsed_days) * days_in_cycle
+        projected_cost = projected_cycle_usage * payment_rate
+        budget_usage_percent = (cycle_usage / target_kwh) * 100 if target_kwh > 0 else 0.0
 
         return Response(
             {
@@ -286,7 +377,9 @@ class DashboardQuickStatsView(APIView):
                 "average_usage": round(average_usage, 4),
                 "projected_cost": round(projected_cost, 2),
                 "budget_usage_percent": round(budget_usage_percent, 2),
-                "monthly_usage": round(month_usage, 4),
+                "monthly_usage": round(cycle_usage, 4),
+                "monthly_target_kwh": round(target_kwh, 4),
+                "cycle_start_day": cycle_start_day,
             },
             status=status.HTTP_200_OK,
         )
@@ -298,20 +391,23 @@ class DashboardGoalTrackerView(APIView):
 
     def get(self, request):
         now = timezone.localtime(timezone.now())
-        payment_rate = _to_float(request.query_params.get("payment_rate"), default=12.0)
-        month_start, month_end = _month_bounds(now)
+        settings = _resolve_dashboard_settings(request, now)
+        payment_rate = settings["payment_rate"]
+        target_kwh = settings["target_kwh"]
+        cycle_start = settings["cycle_start"]
+        cycle_end = settings["cycle_end"]
+        cycle_start_day = settings["cycle_start_day"]
 
-        kwh_used = _usage_between(month_start, min(now, month_end))
-        remaining_kwh = max(0.0, MONTHLY_TARGET_KWH - kwh_used)
+        kwh_used = _usage_between(cycle_start, min(now, cycle_end))
+        remaining_kwh = max(0.0, target_kwh - kwh_used)
 
-        days_in_month = max(1, (month_end - month_start).days)
-        days_remaining = max(1, days_in_month - now.day)
+        days_remaining = max(1, (cycle_end.date() - now.date()).days)
         daily_allowance = remaining_kwh / days_remaining
 
         cost_used = kwh_used * payment_rate
         cost_remaining = remaining_kwh * payment_rate
 
-        percentage_used = (kwh_used / MONTHLY_TARGET_KWH) * 100
+        percentage_used = (kwh_used / target_kwh) * 100 if target_kwh > 0 else 0.0
         if percentage_used >= 100:
             status_key = "exceeded"
         elif percentage_used >= 85:
@@ -322,7 +418,7 @@ class DashboardGoalTrackerView(APIView):
         return Response(
             {
                 "kwh_used": round(kwh_used, 4),
-                "monthly_target_kwh": MONTHLY_TARGET_KWH,
+                "monthly_target_kwh": round(target_kwh, 4),
                 "percentage_used": round(min(percentage_used, 100.0), 2),
                 "remaining": round(remaining_kwh, 4),
                 "days_remaining": days_remaining,
@@ -330,6 +426,7 @@ class DashboardGoalTrackerView(APIView):
                 "cost_used": round(cost_used, 2),
                 "cost_remaining": round(cost_remaining, 2),
                 "status": status_key,
+                "cycle_start_day": cycle_start_day,
             },
             status=status.HTTP_200_OK,
         )
@@ -434,7 +531,11 @@ class ElectricalNotificationsView(APIView):
 
     def get(self, request):
         now = timezone.localtime(timezone.now())
-        payment_rate = _to_float(request.query_params.get("payment_rate"), default=12.0)
+        settings = _resolve_dashboard_settings(request, now)
+        payment_rate = settings["payment_rate"]
+        target_kwh = settings["target_kwh"]
+        cycle_start = settings["cycle_start"]
+        cycle_end = settings["cycle_end"]
 
         latest = ElectricalReading.objects.order_by("-timestamp").first()
         if latest:
@@ -444,10 +545,13 @@ class ElectricalNotificationsView(APIView):
             power = _to_float(request.query_params.get("power"), default=0.0)
             current = _to_float(request.query_params.get("current"), default=0.0)
 
-        month_start, month_end = _month_bounds(now)
-        month_usage = _usage_between(month_start, min(now, month_end))
-        budget_usage_percent = (month_usage / MONTHLY_TARGET_KWH) * 100
-        projected_cost = month_usage * payment_rate
+        cycle_usage = _usage_between(cycle_start, min(now, cycle_end))
+        budget_usage_percent = (cycle_usage / target_kwh) * 100 if target_kwh > 0 else 0.0
+
+        elapsed_days = max(1, (now.date() - cycle_start.date()).days + 1)
+        days_in_cycle = max(1, (cycle_end.date() - cycle_start.date()).days)
+        projected_cycle_usage = (cycle_usage / elapsed_days) * days_in_cycle
+        projected_cost = projected_cycle_usage * payment_rate
 
         notifications = []
 
@@ -523,3 +627,15 @@ class ElectricalNotificationsView(APIView):
             )
 
         return Response(notifications, status=status.HTTP_200_OK)
+    
+from django.http import JsonResponse
+
+def discover(request):
+    host = request.get_host()
+
+    # force ws scheme based on environment
+    ws_url = f"ws://{host}/ws/electrical/"
+
+    return JsonResponse({
+        "ws_url": ws_url
+    })
