@@ -763,8 +763,10 @@ from django.http import JsonResponse
 def discover(request):
     host = request.get_host()
 
-    # force ws scheme based on environment
-    ws_url = f"ws://{host}/ws/electrical/"
+    forwarded_proto = request.META.get("HTTP_X_FORWARDED_PROTO", "")
+    is_secure_request = request.is_secure() or forwarded_proto == "https"
+    ws_scheme = "wss" if is_secure_request else "ws"
+    ws_url = f"{ws_scheme}://{host}/ws/electrical/"
 
     return JsonResponse({
         "ws_url": ws_url

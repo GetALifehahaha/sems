@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 # Rest Framework
 REST_FRAMEWORK = {
@@ -102,10 +102,12 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+SQLITE_PATH = config('SQLITE_PATH', default=str(BASE_DIR / 'db.sqlite3'))
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': SQLITE_PATH,
     }
 }
 
@@ -145,19 +147,31 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # CONFIGURATIONS
-INTERVAL = config('INTERVAL', cast=int)
-LOOKBACK_PERIOD = config('LOOKBACK_PERIOD', cast=int)
+INTERVAL = config('INTERVAL', default=3000, cast=int)
+LOOKBACK_PERIOD = config('LOOKBACK_PERIOD', default=7, cast=int)
 
 # HOSTS
-# ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,.onrender.com',
+    cast=Csv(),
+)
 
 # CORS
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:5173,http://127.0.0.1:5173',
+    cast=Csv(),
+)
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost:5173,http://127.0.0.1:5173',
+    cast=Csv(),
+)
 
 CORS_ALLOW_HEADERS = (
     "accept",
@@ -170,6 +184,8 @@ CORS_ALLOW_HEADERS = (
 )
 
 # SECURITY
+# Trust Render's proxy headers so Django can detect HTTPS correctly.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG

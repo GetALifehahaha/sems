@@ -51,9 +51,31 @@ const deriveActiveCounts = (activeAppliances = [], activeDeviceCount, activeType
     };
 };
 
+const trimTrailingSlash = (value = "") => String(value).replace(/\/+$/, "");
+
 const getWsUrl = () => {
-    const baseUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000";
-    return `${baseUrl}/ws/electrical/`;
+    const configuredWsBase = trimTrailingSlash(import.meta.env.VITE_WS_URL || "");
+    if (configuredWsBase) {
+        return `${configuredWsBase}/ws/electrical/`;
+    }
+
+    const configuredApiBase = import.meta.env.VITE_API_URL || "";
+    if (configuredApiBase) {
+        try {
+            const apiUrl = new URL(configuredApiBase);
+            const wsProtocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
+            return `${wsProtocol}//${apiUrl.host}/ws/electrical/`;
+        } catch {
+            // Fall back to browser location below if API URL parsing fails.
+        }
+    }
+
+    if (typeof window !== "undefined") {
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        return `${wsProtocol}//${window.location.host}/ws/electrical/`;
+    }
+
+    return "ws://localhost:8000/ws/electrical/";
 };
 
 const getApplianceIcon = (applianceName) => {
@@ -309,8 +331,8 @@ const Dashboard = () => {
                     const isTarget = item.id
                         ? item.id === app.id
                         : item.name === app.name &&
-                          Number(item.power) === Number(app.power) &&
-                          Number(item.current) === Number(app.current);
+                        Number(item.power) === Number(app.power) &&
+                        Number(item.current) === Number(app.current);
 
                     if (!isTarget) {
                         return item;
@@ -344,8 +366,8 @@ const Dashboard = () => {
                     retrained && reloaded && !trainingError
                         ? `Saved correction: ${trimmedName} (model updated)`
                         : trainingError
-                          ? `Saved correction, but retrain failed: ${trainingError}`
-                          : "Saved correction, but model was not reloaded.",
+                            ? `Saved correction, but retrain failed: ${trainingError}`
+                            : "Saved correction, but model was not reloaded.",
             });
 
             setFeedbackHistory((prev) => [
@@ -542,11 +564,10 @@ const Dashboard = () => {
                                 <div className="max-h-72 overflow-y-auto pr-2 pb-2 custom-scrollbar">
                                     {feedbackNotice && (
                                         <div
-                                            className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium ${
-                                                feedbackNotice.type === "success"
+                                            className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium ${feedbackNotice.type === "success"
                                                     ? "bg-green-50 text-green-700 border border-green-200"
                                                     : "bg-red-50 text-red-700 border border-red-200"
-                                            }`}
+                                                }`}
                                         >
                                             {feedbackNotice.text}
                                         </div>
