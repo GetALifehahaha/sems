@@ -113,10 +113,6 @@ DATABASES = {
     )
 }
 
-# Add this to support Render's PgBouncer (transaction pooling)
-DATABASES['default']['OPTIONS'] = {
-    'DISABLE_SERVER_SIDE_CURSORS': True,
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
