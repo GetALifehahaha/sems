@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.urls import path, include #type: ignore
 
 
@@ -25,8 +25,25 @@ def root_status(request):
         "service": "sems-backend",
     })
 
+
+def websocket_upgrade_required(request):
+    return JsonResponse(
+        {
+            "detail": "Use a WebSocket client with wss://<host>/ws/electrical/ (HTTP GET is not supported on this path).",
+            "path": "/ws/electrical/",
+            "protocol": "websocket",
+        },
+        status=426,
+    )
+
+
+def favicon_placeholder(request):
+    return HttpResponse(status=204)
+
 urlpatterns = [
     path('', root_status, name='root-status'),
+    path('favicon.ico', favicon_placeholder, name='favicon-placeholder'),
+    path('ws/electrical/', websocket_upgrade_required, name='ws-upgrade-required'),
     path('admin/', admin.site.urls),
     path('electrical/', include('electrical_processing.urls'))
 ]
