@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { AlertCircle, Bell, CheckCircle } from "lucide-react";
 import { fetchJson } from "@/shared";
 
@@ -24,22 +24,39 @@ const mapBackendNotification = (notif, idx) => {
 export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
     const [backendNotifications, setBackendNotifications] = useState([]);
 
-    const kwh = Number(liveData?.kwhConsumption) || 0;
-    const power = Number(liveData?.power) || 0;
-    const current = Number(liveData?.current) || 0;
+    // Store the latest values in a ref so the interval can read them 
+    // without requiring them in the useEffect dependency array.
+    const latestData = useRef({
+        kwh: 0,
+        power: 0,
+        current: 0,
+        paymentRate: 0
+    });
+
+    useEffect(() => {
+        latestData.current = {
+            kwh: Number(liveData?.kwhConsumption) || 0,
+            power: Number(liveData?.power) || 0,
+            current: Number(liveData?.current) || 0,
+            paymentRate: paymentRate,
+        };
+    }, [liveData?.kwhConsumption, liveData?.power, liveData?.current, paymentRate]);
 
     useEffect(() => {
         const controller = new AbortController();
 
         const loadNotifications = async () => {
             try {
+                // Read from the ref to get the most recent data
+                const currentData = latestData.current;
+                
                 const data = await fetchJson("/electrical/notifications/", {
                     signal: controller.signal,
                     query: {
-                        kwh,
-                        power,
-                        current,
-                        payment_rate: paymentRate,
+                        kwh: currentData.kwh,
+                        power: currentData.power,
+                        current: currentData.current,
+                        payment_rate: currentData.paymentRate,
                     },
                 });
 
@@ -52,11 +69,14 @@ export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
                 } else {
                     setBackendNotifications([]);
                 }
-            } catch {
-                setBackendNotifications([]);
+            } catch (err) {
+                if (err?.name !== "AbortError") {
+                    setBackendNotifications([]);
+                }
             }
         };
 
+        // Fire immediately on mount, then strictly every 10 seconds
         loadNotifications();
         const timer = window.setInterval(loadNotifications, 10000);
 
@@ -64,11 +84,10 @@ export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
             window.clearInterval(timer);
             controller.abort();
         };
-    }, [kwh, power, current, paymentRate]);
+    }, []); // Empty dependency array prevents the teardown loop
 
     return useMemo(() => {
         const source = backendNotifications.map(mapBackendNotification);
-
         return source.filter((alert) => !dismissedIds.has(alert.id));
     }, [backendNotifications, dismissedIds]);
 };
