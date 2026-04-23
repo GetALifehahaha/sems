@@ -1,3 +1,4 @@
+# backend/electrical_processing/consumers.py
 import json
 import time
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -7,40 +8,44 @@ from .models import ElectricalReading
 from .ml_service import appliance_ai
 from .views import _build_notifications, _resolve_dashboard_settings
 
-
 class ElectricalConsumer(AsyncWebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # tracking previous readings
         self.last_power = 0.0
         self.last_current = 0.0
 
-        # detected appliances state
         self.active_appliances = []
         self.appliance_counter = 0
 
-        # thresholds
         self.base_threshold = 2.5
         self.min_prediction_confidence = 0.50
         self.off_confidence_floor = 0.50
 
-        # debounce control (prevents spam detection)
         self.last_event_time = 0
         self.debounce_ms = 500
 
-        # Throttle expensive notification calculations from the DB.
         self.cached_notifications = []
         self.last_notification_refresh = 0
         self.notification_refresh_ms = 10000
 
+        self.last_db_save_time = 0
+        self.db_save_interval_ms = 60000
+
     async def connect(self):
-        self.room_group_name = "electrical_data_group"
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        # ALWAYS ACCEPT FIRST to prevent early disconnects
         await self.accept()
 
-        # IMPORTANT: reset state per connection
+        self.room_group_name = "electrical_data_group"
+        
+        # Safely attempt Redis connection
+        try:
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            print("🟢 WebSocket client connected & Redis joined")
+        except Exception as e:
+            print(f"⚠️ REDIS CRASH DURING CONNECT: {e}")
+
         self.last_power = 0.0
         self.last_current = 0.0
         self.active_appliances = []
@@ -48,10 +53,11 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         self.cached_notifications = []
         self.last_notification_refresh = 0
 
-        print("🟢 WebSocket client connected")
-
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        try:
+            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        except Exception:
+            pass
         print("🔴 WebSocket client disconnected")
 
     def _to_float(self, value, default=0.0):
@@ -180,13 +186,10 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         return True
 
     async def receive(self, text_data):
-        # 1. Handle ESP32 Heartbeat
         if text_data == "ping":
-            # Respond to keep the connection alive
             await self.send(text_data="pong")
             return
 
-        # 2. Safely parse JSON
         try:
             data = json.loads(text_data)
         except json.JSONDecodeError:
@@ -290,19 +293,19 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
             except Exception:
                 pass
 
-        # update state
         self.last_power = power
         self.last_current = current
 
-        # attach appliance list
         data["active_appliances"] = list(self.active_appliances)
         active_device_count, active_type_count = self._active_counts()
         data["active_device_count"] = active_device_count
         data["active_type_count"] = active_type_count
         data["notifications"] = await self.get_live_notifications(power, current)
 
-        # save to DB
-        await self.save_reading(data)
+        now_ms = int(time.time() * 1000)
+        if (now_ms - getattr(self, 'last_db_save_time', 0) >= self.db_save_interval_ms) or abs(delta_power) > 50:
+            await self.save_reading(data)
+            self.last_db_save_time = now_ms
 
         await self.channel_layer.group_send(
             self.room_group_name,
