@@ -14,6 +14,7 @@ from pathlib import Path
 from decouple import config, Csv
 from dotenv import load_dotenv
 import dj_database_url
+import os
 
 load_dotenv()
 
@@ -94,10 +95,12 @@ TEMPLATES = [
 # We changed this from WSGI to ASGI
 ASGI_APPLICATION = 'backend.asgi.application'
 
-# Configure the Channel Layer (In-memory for development)
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get("REDIS_URL")],
+        },
     },
 }
 
