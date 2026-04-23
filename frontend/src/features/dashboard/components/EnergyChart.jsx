@@ -91,10 +91,10 @@ const EnergyChart = ({ frequency = "daily" }) => {
         };
 
         fetchChartData();
-        const interval = window.setInterval(fetchChartData, 5000);
 
+        // ⚠️ Watch out: Removed the setInterval. The chart will now only fetch 
+        // when the component mounts or when the user changes the 'frequency' tab.
         return () => {
-            window.clearInterval(interval);
             activeController?.abort();
         };
     }, [frequency]);
