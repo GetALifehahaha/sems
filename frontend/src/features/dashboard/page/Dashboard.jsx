@@ -210,7 +210,24 @@ const Dashboard = () => {
     useEffect(() => {
         let socket;
         let retryTimeout;
+        let heartbeatTimer;
         let isMounted = true;
+
+        const stopHeartbeat = () => {
+            if (heartbeatTimer) {
+                clearInterval(heartbeatTimer);
+                heartbeatTimer = null;
+            }
+        };
+
+        const startHeartbeat = () => {
+            stopHeartbeat();
+            heartbeatTimer = setInterval(() => {
+                if (socket?.readyState === WebSocket.OPEN) {
+                    socket.send("ping");
+                }
+            }, 25000);
+        };
 
         const connect = () => {
             if (!isMounted) return;
@@ -221,10 +238,15 @@ const Dashboard = () => {
             socket.onopen = () => {
                 console.log("🟢 Connected to live data stream!");
                 setLiveError("");
+                startHeartbeat();
             };
 
             socket.onmessage = (event) => {
                 try {
+                    if (event.data === "pong") {
+                        return;
+                    }
+
                     const data = JSON.parse(event.data);
 
                     setLiveData((prev) => {
@@ -266,6 +288,7 @@ const Dashboard = () => {
             };
 
             socket.onclose = () => {
+                stopHeartbeat();
                 console.log("🔴 WebSocket Disconnected. Retrying in 5s...");
                 setLiveError("Live stream paused. Reconnecting...");
                 if (isMounted) {
@@ -279,6 +302,7 @@ const Dashboard = () => {
         return () => {
             isMounted = false;
             clearTimeout(retryTimeout);
+            stopHeartbeat();
             if (socket) {
                 socket.onopen = null;
                 socket.onmessage = null;
