@@ -126,6 +126,7 @@ const Dashboard = () => {
         activeAppliances: [],
         activeDeviceCount: 0,
         activeTypeCount: 0,
+        notifications: [],
     });
     const [isLiveLoading, setIsLiveLoading] = useState(true);
     const [liveError, setLiveError] = useState("");
@@ -192,6 +193,7 @@ const Dashboard = () => {
                     activeAppliances,
                     activeDeviceCount: counts.activeDeviceCount,
                     activeTypeCount: counts.activeTypeCount,
+                    notifications: Array.isArray(data.notifications) ? data.notifications : [],
                 });
                 setLastUpdated(new Date());
                 setIsLiveLoading(false);
@@ -245,6 +247,9 @@ const Dashboard = () => {
                             activeAppliances,
                             activeDeviceCount: counts.activeDeviceCount,
                             activeTypeCount: counts.activeTypeCount,
+                            notifications: Array.isArray(data.notifications)
+                                ? data.notifications
+                                : prev.notifications,
                         };
                     });
 
@@ -433,7 +438,7 @@ const Dashboard = () => {
 
     return (
         <div className="p-4 md:p-6 flex flex-col mb-8">
-            <Header liveData={liveData} PAYMENT_RATE={paymentRate} />
+            <Header liveData={liveData} />
 
             {showPrefsModal && (
                 <PreferencesModal
@@ -565,8 +570,8 @@ const Dashboard = () => {
                                     {feedbackNotice && (
                                         <div
                                             className={`mb-3 rounded-lg px-3 py-2 text-xs font-medium ${feedbackNotice.type === "success"
-                                                    ? "bg-green-50 text-green-700 border border-green-200"
-                                                    : "bg-red-50 text-red-700 border border-red-200"
+                                                ? "bg-green-50 text-green-700 border border-green-200"
+                                                : "bg-red-50 text-red-700 border border-red-200"
                                                 }`}
                                         >
                                             {feedbackNotice.text}

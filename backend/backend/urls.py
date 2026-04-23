@@ -15,9 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import path, include #type: ignore
 
+
+def root_status(request):
+    return JsonResponse({
+        "status": "ok",
+        "service": "sems-backend",
+    })
+
 urlpatterns = [
+    path('', root_status, name='root-status'),
     path('admin/', admin.site.urls),
     path('electrical/', include('electrical_processing.urls'))
 ]

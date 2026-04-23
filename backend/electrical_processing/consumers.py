@@ -2,8 +2,10 @@ import json
 import time
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.utils import timezone
 from .models import ElectricalReading
 from .ml_service import appliance_ai
+from .views import _build_notifications, _resolve_dashboard_settings
 
 
 class ElectricalConsumer(AsyncWebsocketConsumer):
@@ -28,6 +30,11 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         self.last_event_time = 0
         self.debounce_ms = 500
 
+        # Throttle expensive notification calculations from the DB.
+        self.cached_notifications = []
+        self.last_notification_refresh = 0
+        self.notification_refresh_ms = 10000
+
     async def connect(self):
         self.room_group_name = "electrical_data_group"
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -38,12 +45,14 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         self.last_current = 0.0
         self.active_appliances = []
         self.appliance_counter = 0
+        self.cached_notifications = []
+        self.last_notification_refresh = 0
 
-        print("🟢 ESP32 Connected")
+        print("🟢 WebSocket client connected")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-        print("🔴 ESP32 Disconnected")
+        print("🔴 WebSocket client disconnected")
 
     def _to_float(self, value, default=0.0):
         try:
@@ -290,6 +299,7 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         active_device_count, active_type_count = self._active_counts()
         data["active_device_count"] = active_device_count
         data["active_type_count"] = active_type_count
+        data["notifications"] = await self.get_live_notifications(power, current)
 
         # save to DB
         await self.save_reading(data)
@@ -300,6 +310,34 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
                 "type": "broadcast_data",
                 "message": data,
             }
+        )
+
+    async def get_live_notifications(self, power, current):
+        now_ms = int(time.time() * 1000)
+        should_refresh = (
+            not self.cached_notifications
+            or (now_ms - self.last_notification_refresh) >= self.notification_refresh_ms
+        )
+
+        if should_refresh:
+            self.cached_notifications = await self.build_notifications_snapshot(power, current)
+            self.last_notification_refresh = now_ms
+
+        return list(self.cached_notifications)
+
+    @database_sync_to_async
+    def build_notifications_snapshot(self, power, current):
+        now = timezone.localtime(timezone.now())
+        settings = _resolve_dashboard_settings(request=None, now=now)
+
+        return _build_notifications(
+            now,
+            target_kwh=settings["target_kwh"],
+            payment_rate=settings["payment_rate"],
+            cycle_start=settings["cycle_start"],
+            cycle_end=settings["cycle_end"],
+            power=power,
+            current=current,
         )
 
     async def broadcast_data(self, event):

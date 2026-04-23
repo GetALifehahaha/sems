@@ -124,19 +124,26 @@ def _cycle_bounds(now, cycle_start_day):
     return cycle_start, cycle_end
 
 
+def _query_param(request, key):
+    query_params = getattr(request, "query_params", None)
+    if query_params is None:
+        return None
+    return query_params.get(key)
+
+
 def _resolve_dashboard_settings(request, now):
     pref = _get_dashboard_preferences()
 
-    target_kwh = _to_float(request.query_params.get("target_kwh"), default=pref.target_kwh)
+    target_kwh = _to_float(_query_param(request, "target_kwh"), default=pref.target_kwh)
     if target_kwh <= 0:
         target_kwh = pref.target_kwh
 
-    payment_rate = _to_float(request.query_params.get("payment_rate"), default=pref.cost_rate)
+    payment_rate = _to_float(_query_param(request, "payment_rate"), default=pref.cost_rate)
     if payment_rate < 0:
         payment_rate = pref.cost_rate
 
     cycle_start_day = _normalize_cycle_start_day(
-        request.query_params.get("cycle_start_day"),
+        _query_param(request, "cycle_start_day"),
         default=pref.cycle_start_day,
     )
 
@@ -149,6 +156,100 @@ def _resolve_dashboard_settings(request, now):
         "cycle_start": cycle_start,
         "cycle_end": cycle_end,
     }
+
+
+def _build_notifications(
+    now,
+    *,
+    target_kwh,
+    payment_rate,
+    cycle_start,
+    cycle_end,
+    power,
+    current,
+):
+    cycle_usage = _usage_between(cycle_start, min(now, cycle_end))
+    budget_usage_percent = (cycle_usage / target_kwh) * 100 if target_kwh > 0 else 0.0
+
+    elapsed_days = max(1, (now.date() - cycle_start.date()).days + 1)
+    days_in_cycle = max(1, (cycle_end.date() - cycle_start.date()).days)
+    projected_cycle_usage = (cycle_usage / elapsed_days) * days_in_cycle
+    projected_cost = projected_cycle_usage * payment_rate
+
+    notifications = []
+
+    if budget_usage_percent >= 100:
+        notifications.append(
+            {
+                "id": "budget_exceeded",
+                "type": "error",
+                "severity": "critical",
+                "title": "Budget Exceeded",
+                "message": f"You've used {budget_usage_percent:.0f}% of your monthly limit",
+                "timestamp": now.isoformat(),
+            }
+        )
+    elif budget_usage_percent >= 85:
+        notifications.append(
+            {
+                "id": "budget_warning",
+                "type": "warning",
+                "severity": "high",
+                "title": "Budget Alert",
+                "message": f"You're at {budget_usage_percent:.0f}% of monthly limit",
+                "timestamp": now.isoformat(),
+            }
+        )
+
+    if power > 2500:
+        notifications.append(
+            {
+                "id": "high_consumption",
+                "type": "warning",
+                "severity": "high",
+                "title": "High Consumption",
+                "message": f"High power usage: {power:.1f}W detected",
+                "timestamp": now.isoformat(),
+            }
+        )
+
+    if current > 15:
+        notifications.append(
+            {
+                "id": "high_current",
+                "type": "warning",
+                "severity": "medium",
+                "title": "High Current",
+                "message": f"Current load: {current:.2f}A (monitor appliances)",
+                "timestamp": now.isoformat(),
+            }
+        )
+
+    if projected_cost > 1800:
+        notifications.append(
+            {
+                "id": "cost_high",
+                "type": "warning",
+                "severity": "high",
+                "title": "Cost Projection",
+                "message": f"Projected cost: PHP {projected_cost:.2f} (higher than usual)",
+                "timestamp": now.isoformat(),
+            }
+        )
+
+    if not notifications:
+        notifications.append(
+            {
+                "id": "system_ok",
+                "type": "success",
+                "severity": "low",
+                "title": "System Status",
+                "message": "All systems operating normally",
+                "timestamp": now.isoformat(),
+            }
+        )
+
+    return notifications
 
 
 def _nilp_dataset_path():
@@ -589,86 +690,15 @@ class ElectricalNotificationsView(APIView):
             power = _to_float(request.query_params.get("power"), default=0.0)
             current = _to_float(request.query_params.get("current"), default=0.0)
 
-        cycle_usage = _usage_between(cycle_start, min(now, cycle_end))
-        budget_usage_percent = (cycle_usage / target_kwh) * 100 if target_kwh > 0 else 0.0
-
-        elapsed_days = max(1, (now.date() - cycle_start.date()).days + 1)
-        days_in_cycle = max(1, (cycle_end.date() - cycle_start.date()).days)
-        projected_cycle_usage = (cycle_usage / elapsed_days) * days_in_cycle
-        projected_cost = projected_cycle_usage * payment_rate
-
-        notifications = []
-
-        if budget_usage_percent >= 100:
-            notifications.append(
-                {
-                    "id": "budget_exceeded",
-                    "type": "error",
-                    "severity": "critical",
-                    "title": "Budget Exceeded",
-                    "message": f"You've used {budget_usage_percent:.0f}% of your monthly limit",
-                    "timestamp": now.isoformat(),
-                }
-            )
-        elif budget_usage_percent >= 85:
-            notifications.append(
-                {
-                    "id": "budget_warning",
-                    "type": "warning",
-                    "severity": "high",
-                    "title": "Budget Alert",
-                    "message": f"You're at {budget_usage_percent:.0f}% of monthly limit",
-                    "timestamp": now.isoformat(),
-                }
-            )
-
-        if power > 2500:
-            notifications.append(
-                {
-                    "id": "high_consumption",
-                    "type": "warning",
-                    "severity": "high",
-                    "title": "High Consumption",
-                    "message": f"High power usage: {power:.1f}W detected",
-                    "timestamp": now.isoformat(),
-                }
-            )
-
-        if current > 15:
-            notifications.append(
-                {
-                    "id": "high_current",
-                    "type": "warning",
-                    "severity": "medium",
-                    "title": "High Current",
-                    "message": f"Current load: {current:.2f}A (monitor appliances)",
-                    "timestamp": now.isoformat(),
-                }
-            )
-
-        if projected_cost > 1800:
-            notifications.append(
-                {
-                    "id": "cost_high",
-                    "type": "warning",
-                    "severity": "high",
-                    "title": "Cost Projection",
-                    "message": f"Projected cost: PHP {projected_cost:.2f} (higher than usual)",
-                    "timestamp": now.isoformat(),
-                }
-            )
-
-        if not notifications:
-            notifications.append(
-                {
-                    "id": "system_ok",
-                    "type": "success",
-                    "severity": "low",
-                    "title": "System Status",
-                    "message": "All systems operating normally",
-                    "timestamp": now.isoformat(),
-                }
-            )
+        notifications = _build_notifications(
+            now,
+            target_kwh=target_kwh,
+            payment_rate=payment_rate,
+            cycle_start=cycle_start,
+            cycle_end=cycle_end,
+            power=power,
+            current=current,
+        )
 
         return Response(notifications, status=status.HTTP_200_OK)
 

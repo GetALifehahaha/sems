@@ -3,12 +3,11 @@ import { Bell, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNotifications } from "../hooks/useNotifications";
 
-const NotificationCenter = ({ liveData = {}, PAYMENT_RATE = 12 }) => {
+const NotificationCenter = ({ liveData = {} }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [dismissedIds, setDismissedIds] = useState(new Set());
     const notifications = useNotifications({
         liveData,
-        paymentRate: PAYMENT_RATE,
         dismissedIds,
     });
 
