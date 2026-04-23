@@ -11,17 +11,24 @@ from rest_framework.response import Response
 from .models import DashboardPreference, ElectricalReading
 from .serializers import DashboardPreferenceSerializer, ElectricalReadingSerializer
 from backend.settings import LOOKBACK_PERIOD
+from django.core.cache import cache
 
 
 MONTHLY_TARGET_KWH = 150.0
 
 
 def _get_dashboard_preferences():
-    pref = DashboardPreference.objects.order_by("id").first()
-    if pref is None:
-        pref = DashboardPreference.objects.create()
-    return pref
+    pref = cache.get("dashboard_pref")
 
+    if pref is None:
+        pref = DashboardPreference.objects.order_by("id").first()
+
+        if pref is None:
+            pref = DashboardPreference.objects.create()
+
+        cache.set("dashboard_pref", pref, timeout=60)
+
+    return pref
 
 def _to_float(value, default=0.0):
     try:
@@ -58,15 +65,25 @@ def _to_bool(value, default=False):
 
 
 def _usage_between(start_dt, end_dt):
-    agg = (
-        ElectricalReading.objects
-        .filter(timestamp__gte=start_dt, timestamp__lte=end_dt)
-        .aggregate(first_kwh=Min("kwh_consumption"), last_kwh=Max("kwh_consumption"))
+    qs = ElectricalReading.objects.filter(
+        timestamp__gte=start_dt,
+        timestamp__lte=end_dt
     )
+
+    if not qs.exists():
+        return 0.0
+
+    agg = qs.aggregate(
+        first_kwh=Min("kwh_consumption"),
+        last_kwh=Max("kwh_consumption")
+    )
+
     first_kwh = agg["first_kwh"]
     last_kwh = agg["last_kwh"]
+
     if first_kwh is None or last_kwh is None:
         return 0.0
+
     return max(0.0, last_kwh - first_kwh)
 
 
@@ -328,34 +345,38 @@ class LatestElectricalReadingView(APIView):
 
     def get(self, request):
         now = timezone.localtime(timezone.now())
-        day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        month_start, month_end = _month_bounds(now)
 
-        today_kwh_usage = _usage_between(day_start, now)
-        month_kwh_usage = _usage_between(month_start, min(now, month_end))
+        latest = (
+            ElectricalReading.objects
+            .only("voltage", "current", "power", "kwh_consumption", "timestamp")
+            .order_by('-timestamp')
+            .first()
+        )
 
-        latest_reading = ElectricalReading.objects.order_by('-timestamp').first()
-        if latest_reading:
-            serializer = ElectricalReadingSerializer(latest_reading)
-            response_data = {
-                **serializer.data,
-                "today_kwh_usage": round(today_kwh_usage, 4),
-                "month_kwh_usage": round(month_kwh_usage, 4),
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
-        
-        return Response(
-            {
+        if not latest:
+            return Response({
                 "voltage": 0,
                 "current": 0,
                 "power": 0,
                 "kwh_consumption": 0,
                 "today_kwh_usage": 0,
                 "month_kwh_usage": 0,
-            }, 
-            status=status.HTTP_200_OK
-        )
+            })
 
+        day_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        month_start, month_end = _month_bounds(now)
+
+        today_kwh_usage = _usage_between(day_start, now)
+        month_kwh_usage = _usage_between(month_start, min(now, month_end))
+
+        return Response({
+            "voltage": latest.voltage,
+            "current": latest.current,
+            "power": latest.power,
+            "kwh_consumption": latest.kwh_consumption,
+            "today_kwh_usage": round(today_kwh_usage, 4),
+            "month_kwh_usage": round(month_kwh_usage, 4),
+        })
 
 class DashboardQuickStatsView(APIView):
     permission_classes = [permissions.AllowAny]

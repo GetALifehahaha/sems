@@ -107,12 +107,11 @@ DATABASE_URL = config('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite
 
 DATABASES = {
     'default': dj_database_url.parse(
-        DATABASE_URL, 
-        conn_max_age=600,
+        DATABASE_URL,
+        conn_max_age=60,          
         conn_health_checks=True,
     )
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
