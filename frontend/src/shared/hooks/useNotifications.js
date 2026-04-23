@@ -40,7 +40,7 @@ export const useNotifications = ({ liveData, paymentRate, dismissedIds }) => {
             current: Number(liveData?.current) || 0,
             paymentRate: paymentRate,
         };
-    }, [liveData?.kwhConsumption, liveData?.power, liveData?.current, paymentRate]);
+    }, [liveData, paymentRate]);
 
     useEffect(() => {
         const controller = new AbortController();
