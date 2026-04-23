@@ -15,6 +15,7 @@ from decouple import config, Csv
 from dotenv import load_dotenv
 import dj_database_url
 import os
+import ssl
 
 load_dotenv()
 
@@ -95,11 +96,19 @@ TEMPLATES = [
 # We changed this from WSGI to ASGI
 ASGI_APPLICATION = 'backend.asgi.application'
 
+
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.environ.get("REDIS_URL")],
+            "hosts": [{
+                "address": os.environ.get("REDIS_URL"),
+                "ssl": ssl_context,
+            }],
         },
     },
 }
