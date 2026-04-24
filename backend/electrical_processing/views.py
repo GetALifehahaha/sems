@@ -822,3 +822,40 @@ def discover(request):
     return JsonResponse({
         "ws_url": ws_url
     })
+    
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+from .models import ElectricalReading
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+@api_view(['POST'])
+def ingest_reading(request):
+    data = request.data
+
+    # Save to DB
+    ElectricalReading.objects.create(
+        voltage=data.get('voltage', 0),
+        current=data.get('current', 0),
+        power=data.get('power', 0),
+        kwh_consumption=data.get('kwh_consumption', 0),
+    )
+
+    # Push to WebSocket group
+    channel_layer = get_channel_layer()
+
+    async_to_sync(channel_layer.group_send)(
+        "electrical_data_group",
+        {
+            "type": "broadcast_data",
+            "message": data,
+        }
+    )
+
+    return Response({"status": "ok"})

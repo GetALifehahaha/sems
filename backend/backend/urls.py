@@ -45,5 +45,6 @@ urlpatterns = [
     path('favicon.ico', favicon_placeholder, name='favicon-placeholder'),
     path('ws/electrical/', websocket_upgrade_required, name='ws-upgrade-required'),
     path('admin/', admin.site.urls),
-    path('electrical/', include('electrical_processing.urls'))
+    path('electrical/', include('electrical_processing.urls')),
+    path('api/electrical/', include('electrical_processing.urls'))
 ]

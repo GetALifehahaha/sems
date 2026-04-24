@@ -13,6 +13,7 @@ from .views import (
     ElectricalNotificationsView,
     NilpFeedbackView,
     discover,
+    ingest_reading,
 )
 
 urlpatterns = [
@@ -37,4 +38,5 @@ urlpatterns = [
     path("notifications/", ElectricalNotificationsView.as_view(), name="notifications"),
     path("nilp-feedback/", NilpFeedbackView.as_view(), name="nilp-feedback"),
     path("discover/", discover),
+    path('ingest/', ingest_reading),
 ]
