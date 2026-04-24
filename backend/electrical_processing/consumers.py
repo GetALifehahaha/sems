@@ -1,4 +1,3 @@
-# backend/electrical_processing/consumers.py
 import json
 import time
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -59,6 +58,12 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         except Exception:
             pass
         print("🔴 WebSocket client disconnected")
+        
+    # This allows HTTP → consumer pipeline reuse
+    async def receive_data(self, event):
+        data = event["data"]
+        # reuse full ML pipeline
+        await self.receive(text_data=json.dumps(data))
 
     def _to_float(self, value, default=0.0):
         try:
@@ -300,6 +305,8 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
         active_device_count, active_type_count = self._active_counts()
         data["active_device_count"] = active_device_count
         data["active_type_count"] = active_type_count
+        
+        # Safely fetches notifications using your sync_to_async wrapper
         data["notifications"] = await self.get_live_notifications(power, current)
 
         now_ms = int(time.time() * 1000)
@@ -343,6 +350,7 @@ class ElectricalConsumer(AsyncWebsocketConsumer):
             current=current,
         )
 
+    # Class method for broadcasting out to connected WebSocket clients
     async def broadcast_data(self, event):
         await self.send(text_data=json.dumps(event["message"]))
 
