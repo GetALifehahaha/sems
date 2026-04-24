@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis, Rectangle } from "recharts";
+import { Bar, BarChart, Area, AreaChart, CartesianGrid, XAxis, YAxis, Rectangle } from "recharts";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import {
     getSubtitle,
@@ -30,7 +30,6 @@ const EnergyChart = ({ frequency = "daily" }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // This is the state that controls our side-by-side toggle button
     const [chartType, setChartType] = useState("bar");
 
     useEffect(() => {
@@ -92,8 +91,6 @@ const EnergyChart = ({ frequency = "daily" }) => {
 
         fetchChartData();
 
-        // ⚠️ Watch out: Removed the setInterval. The chart will now only fetch 
-        // when the component mounts or when the user changes the 'frequency' tab.
         return () => {
             activeController?.abort();
         };
@@ -104,7 +101,7 @@ const EnergyChart = ({ frequency = "daily" }) => {
         const fill = isHighConsumption(consumption, frequency)
             ? "#ef4444"
             : "var(--color-consumption)";
-        return <Rectangle {...props} fill={fill} radius={[8, 8, 0, 0]} />;
+        return <Rectangle {...props} fill={fill} radius={[0, 8, 8, 0]} />;
     };
 
     if (error) {
@@ -125,10 +122,12 @@ const EnergyChart = ({ frequency = "daily" }) => {
         );
     }
 
+    // Calculate a dynamic height based on the number of bars. 
+    // About 50px per bar gives a nice tight grouping.
+    const dynamicBarHeight = Math.max(chartData.length * 50 + 40, 150);
+
     return (
         <div className="w-full h-full flex flex-col p-4">
-
-            {/* The Header and our side-by-side toggle switch */}
             <div className="flex justify-between items-center mb-4 px-2">
                 <div>
                     <h3 className="font-bold text-base mb-1">
@@ -139,7 +138,6 @@ const EnergyChart = ({ frequency = "daily" }) => {
                     </p>
                 </div>
 
-                {/* Side-by-side buttons wrapped in a gray pill shape */}
                 <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/50">
                     <button
                         onClick={() => setChartType("bar")}
@@ -162,43 +160,55 @@ const EnergyChart = ({ frequency = "daily" }) => {
                 </div>
             </div>
 
-            <ChartContainer config={chartConfig} className="h-full w-full min-h-62.5">
-                {/* This asks: Is chartType equal to "bar"? If yes, show BarChart. If no, show AreaChart. */}
-                {chartType === "bar" ? (
-                    <BarChart accessibilityLayer data={chartData}>
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                            dataKey="time"
-                            tickLine={false}
-                            tickMargin={8}
-                            minTickGap={24}
-                            axisLine={false}
-                        />
-                        <ChartTooltip cursor={false} content={<CustomTooltip />} />
-                        <Bar dataKey="consumption" shape={<CustomBar />} />
-                    </BarChart>
-                ) : (
-                    <AreaChart accessibilityLayer data={chartData}>
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                            dataKey="time"
-                            tickLine={false}
-                            tickMargin={8}
-                            minTickGap={24}
-                            axisLine={false}
-                        />
-                        <ChartTooltip cursor={false} content={<CustomTooltip />} />
-                        <Area
-                            type="monotone"
-                            dataKey="consumption"
-                            stroke="var(--color-consumption)"
-                            fill="var(--color-consumption)"
-                            fillOpacity={0.2}
-                            strokeWidth={3}
-                        />
-                    </AreaChart>
-                )}
-            </ChartContainer>
+            {/* Scrollable wrapper in case the list of days/months gets very long */}
+            <div className="flex-1 w-full overflow-y-auto custom-scrollbar pr-2">
+                <ChartContainer
+                    config={chartConfig}
+                    className="w-full aspect-auto"
+                    style={{
+                        height: chartType === "bar" ? `${dynamicBarHeight}px` : "100%",
+                        minHeight: chartType === "area" ? "250px" : "auto"
+                    }}
+                >
+                    {chartType === "bar" ? (
+                        <BarChart accessibilityLayer data={chartData} layout="vertical" margin={{ left: 10 }}>
+                            <CartesianGrid horizontal={false} vertical={true} />
+                            <XAxis type="number" hide />
+                            <YAxis
+                                dataKey="time"
+                                type="category"
+                                tickLine={false}
+                                tickMargin={8}
+                                axisLine={false}
+                                width={80}
+                            />
+                            <ChartTooltip cursor={false} content={<CustomTooltip />} />
+                            {/* maxBarSize ensures they stay thin, dynamic container height ensures they stay close */}
+                            <Bar dataKey="consumption" shape={<CustomBar />} maxBarSize={28} />
+                        </BarChart>
+                    ) : (
+                        <AreaChart accessibilityLayer data={chartData}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="time"
+                                tickLine={false}
+                                tickMargin={8}
+                                minTickGap={24}
+                                axisLine={false}
+                            />
+                            <ChartTooltip cursor={false} content={<CustomTooltip />} />
+                            <Area
+                                type="monotone"
+                                dataKey="consumption"
+                                stroke="var(--color-consumption)"
+                                fill="var(--color-consumption)"
+                                fillOpacity={0.2}
+                                strokeWidth={3}
+                            />
+                        </AreaChart>
+                    )}
+                </ChartContainer>
+            </div>
         </div>
     );
 };
